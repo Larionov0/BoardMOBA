@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script>
+class ObjectRebuilder
+{
+    // We need this so we can instantiate objects from class name strings
+    // static classList() {
+    //     return {
+    //         Page: Page,
+    //         PageSection: PageSection
+    //     }
+    // }
+
+    // Checks if passed variable is object.
+    // Returns true for arrays as well, as intended
+    static isObject(varOrObj) {
+        return varOrObj !== null && typeof varOrObj === 'object';
+    }
+
+    static restoreObject(obj) {
+        let newObj = obj;
+
+        // At this point we have regular javascript object
+        // which we got from JSON.parse. First, check if it
+        // has "__className" property which we defined in the
+        // constructor of each class
+        if (obj.hasOwnProperty("__className")) {
+            // let list = ObjectRebuilder.classList();
+
+            // // Instantiate object of the correct class
+            // newObj = new (list[obj["__className"]]);
+
+            // Copy all of current object's properties
+            // to the newly instantiated object
+            let class_ = eval(obj.__className)
+            newObj = Object.assign(new class_, obj);
+
+            // Run the makeshift constructor, if the
+            // new object has one
+            if (newObj.__initialize === 'function') {
+                newObj.__initialize();
+            }
+        }
+
+        // Iterate over all of the properties of the new
+        // object, and if some of them are objects (or arrays!) 
+        // constructed by JSON.parse, run them through ObjectRebuilder
+        for (let prop of Object.keys(newObj)) {
+            if (ObjectRebuilder.isObject(newObj[prop])) {
+                newObj[prop] = ObjectRebuilder.restoreObject(newObj[prop]);
+            }
+        }
+
+        return newObj;
+    }
+}
+
+
+class TestBag {
+    constructor (){
+        this.tests = []
+        this.lol = 10
+    }
+
+    add_test(test){
+        this.tests.push(test)
+    }
+}
+
+
+class Test {
+    constructor(a, f){
+        this.a = a
+        this.f = f
+        this.test = {a:1, b:2}
+    }
+
+    mult(b){
+        return this.a * b
+    }
+}
+
+
+let replacer = (key, value)=>{
+    if (typeof value ==="function"){
+        return "/Function(" + value.toString() + ")/";
+    }
+    if (typeof value ==="object"){
+        value.__className = value.constructor.name
+    }
+    return value
+}
+
+let reviver = function(key, value) {
+  if (typeof value === "string" &&
+      value.startsWith("/Function(") &&
+      value.endsWith(")/")) {
+    value = value.substring(10, value.length - 2);
+    return (0, eval)("(" + value + ")");
+  }
+  return value;
+}
+
+function sstringify(obj){
+    return JSON.stringify(test_bag, replacer)
+}
+
+function sparse(json){
+    return ObjectRebuilder.restoreObject(JSON.parse(json, reviver))
+}
+
+var test_bag = new TestBag()
+test_bag.add_test(new Test(100, ()=>{return 10}))
+var json = JSON.stringify(test_bag, replacer)
+var parsed = JSON.parse(json, reviver)
+var test_copy = ObjectRebuilder.restoreObject(parsed)
+
+console.log(test_bag);
+console.log(json);
+console.log(parsed)
+
+console.log(test_copy);
+console.log(test_bag);
+
+</script>
+</html>

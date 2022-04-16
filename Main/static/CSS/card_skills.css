@@ -1,0 +1,89 @@
+.skill {
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    transition-duration: 0.1s;
+    max-width: 22%;
+    min-width: 10%;
+    height: 90%;
+    /* background-color: rgba(82, 144, 87, 0.915); */
+    background-color: rgb(95, 150, 100);
+    z-index: 10;
+    outline: 1px solid black;
+
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.unaccessible_skill {
+    background-color: rgba(130, 130, 130, 0.915);
+}
+
+.skill_chosen {
+    outline: 3px solid rgba(255, 251, 0, 0.507);
+}
+
+.skill:hover {
+    min-width: 50%;
+    max-width: 50%;
+    height: 150%;
+    font-size: 25px;
+}
+
+.skill_name {
+    font-size: 50%;
+    height: 15%;
+    text-align: center;
+    background-color: rgba(197, 216, 194, 0.407);
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.skill_image_div {
+    height: 40%;
+    background-color: rgba(30, 28, 72, 0.455);
+}
+
+.skill_image_div img {
+    height: 100%;
+    width: 100%;
+}
+
+.skill_description {
+    height: 30%;
+    font-size: 35%;
+    overflow: hidden;
+}
+
+.hero_card:hover .skill_description {
+    overflow-y: auto;
+}
+
+.skill_params {
+    height: 15%;
+    background-color: rgba(0, 0, 0, 0.162);
+    font-size: 0.5em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8em;
+}
+
+.skill_param {
+    width: 33%;
+    height: 100%;
+    text-align: center;
+    outline: 1px solid black;
+    line-height: 0.75em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.param_left {
+    background-color: rgba(38, 76, 179, 0.251);
+}
+
+.param_right {
+    background-color: rgba(255, 255, 0, 0.086);
+}

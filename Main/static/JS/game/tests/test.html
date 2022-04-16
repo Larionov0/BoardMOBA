@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+
+<script>
+    class Test {
+        constructor(a, f){
+            this.a = a
+            this.f = f
+        }
+
+        mult(b){
+            return this.a * b
+        }
+    }
+
+
+    let replacer = (key, value)=>{
+        if (typeof value ==="function"){
+            return value.toString()
+        }
+        if (typeof value ==="object"){
+            value.proto_name = value.constructor.name
+        }
+        return value
+    }
+
+    let reviver = (key, value) => {  
+        if (typeof key === 'string' && key.indexOf('function ') === 0) {
+            return eval(`(${value})`);  
+        }   
+        if (typeof value ==="object"){
+            let obj = eval(value)
+            let class_ = eval(obj.proto_name)
+            return Object.assign(new class_(), obj)
+        }
+        return value;
+        };
+    
+    var a = new Test(1, ()=>{return 10})
+    var json = JSON.stringify(a, replacer)
+
+    console.log(a)
+    console.log(json)
+
+    var b = JSON.parse(json, reviver)
+    console.log(b)
+
+</script>
+</html>
