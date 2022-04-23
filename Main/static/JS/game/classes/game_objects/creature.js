@@ -1,24 +1,23 @@
-import { distance } from "../tools/math_tools.js"
-import { marks_generator } from "./marks_generator.js"
-import { Shield } from "./shield.js"
-import { Solidity } from "../effects/solidity.js"
-import { Stun } from "../effects/stun.js"
-import { Poison } from "../effects/poison.js"
-import { DelayedDamage } from "../effects/delayed_damage.js"
+import { distance } from "../../tools/math_tools.js"
+import { marks_generator } from "../marks_generator.js"
+import { Shield } from "../shield.js"
+import { Solidity } from "../../effects/solidity.js"
+import { Stun } from "../../effects/stun.js"
+import { Poison } from "../../effects/poison.js"
+import { DelayedDamage } from "../../effects/delayed_damage.js"
+import { GameObject } from "./game_object.js"
 
 
-class Hero {
-    constructor ({name, eng_name, img_src, is_proto, initiative, i, j, hp, energy, power, armor, magic, skills, color, attack_range=2, token_img_src=''}={}){
+class Creature extends GameObject {
+    constructor ({name, eng_name, img_src, is_proto, i, j, hp, energy, power, armor, magic, color, attack_range=2, token_img_src=''}={}){
+        super(i, j, true, token_img_src)
+        
         this.game_state = null  // ! at start of match
 
         this.name = name
         this.eng_name = eng_name
         this.img_src = img_src
-        this.token_img_src = token_img_src
         this.is_proto = is_proto
-        this.initiative = initiative // будет определяться случайно в начале матча
-        this.i = i
-        this.j = j
 
         this.base_params = {
             max_hp: hp,
@@ -30,6 +29,7 @@ class Hero {
             attack_cost: 2,
 
             slowdown: 0,
+            silence: false,
             solidity: false,
             can_autoattack: true,
             stun: false,
@@ -39,20 +39,21 @@ class Hero {
                 toxicity_duration: 0,
             }
         }
-        this.hp = hp
-        this.energy = energy,
 
         this.params = {
             ...this.base_params,
             // autoattack_effects: {...this.base_params.autoattack_effects}
         }
 
+        this.hp = hp
+        this.energy = energy,
+
         this.effects = []
         this.my_effects = []  // casted by me
         this.shields = []
         this.modificators = []
 
-        this.skills = skills
+        
         this.color = color
         if (this.color == undefined) this.color = 'black'
 
@@ -61,6 +62,8 @@ class Hero {
         this.cell_link = null
 
         this.is_solid = true // we cannot move through it
+        this.is_hero = false
+        this.is_creature = true
         this.attacks_during_turn = 0
 
         this.is_alive = true
@@ -68,9 +71,12 @@ class Hero {
         this.index = null
         this.global_index = null
 
-        this.skill_chosen=null
+        this.gold_reward = 0
+        
         this.left_click_listener = null
         this.dop_marks_generators = {}
+
+        this.html_cell_class = 'creature'
         this.restore_standard_dop_marks_generators()  // функции, которые будут возвращать список меток
     }
     get max_hp(){return this.params.max_hp}
@@ -107,12 +113,8 @@ class Hero {
         }
 
         if (this.attacks_during_turn > 0) this.params.can_autoattack = false
-        if (this.alive_effects.filter((eff)=>eff instanceof Solidity).length>0) this.params.solidity = true
-        if (this.alive_effects.filter((eff)=>eff instanceof Stun).length>0) this.params.stun = true
-    }
-
-    get coords(){
-        return [this.i, this.j]
+        // if (this.alive_effects.filter((eff)=>eff instanceof Solidity).length>0) this.params.solidity = true
+        // if (this.alive_effects.filter((eff)=>eff instanceof Stun).length>0) this.params.stun = true
     }
 
     clear_dop_marks_generators(){
@@ -145,13 +147,10 @@ class Hero {
     }
 
     gen_active_marks(){
-        // gen romb around active hero. Size = energy
-        // var marks = this.gen_move_marks()
         var marks = []
         for (const [key, generator] of Object.entries(this.dop_marks_generators)){
             marks = [...marks, ...generator(this.game_state, this)]  // !!!  game_state, hero
         }
-
         return marks
     }
 
@@ -160,10 +159,6 @@ class Hero {
     }
 
     before_move(){
-        // calls for all heroes
-        this.skills.forEach((skill)=>{skill.chosen=false})
-        this.skill_chosen = null
-
         this.recalc_params()
 
         this.alive_effects.forEach((effect)=>{effect.before_target_move()})
@@ -180,10 +175,7 @@ class Hero {
         this.recalc_params()
 
         this.energy = this.max_energy
-
-        this.local_before_move()
-
-        if (this.params.stun) this.game_state.after_hero_move()
+        // STUN !!!! u4ti
     }
 
     after_move(game_state){
@@ -191,10 +183,6 @@ class Hero {
         this.alive_my_effects.forEach((effect)=>{effect.after_move()})
         this.alive_modificators.forEach((mod)=>{if (mod.when=='after') mod.decrease()})
         this.effects_cleaner()
-
-        for (let skill of this.skills){
-            skill.cooldown_down()
-        }
     }
 
     shields_cleaner(){
@@ -225,9 +213,8 @@ class Hero {
     }
 
     check_if_can_move_to_point(game_state, i, j){
-        for (let game_obj of game_state.get_all_game_objects()){
-            if (game_obj.i==i && game_obj.j==j && game_obj.is_solid) return false
-        }
+        let target = game_state.find_solid_obj_by_coords(i, j)
+        if (target) return false
         
         if (i < 0 || j < 0 || i >= game_state.n || j > game_state.m) return false
 
@@ -258,12 +245,16 @@ class Hero {
         }
         if (this.check_if_can_move_to_point(game_state, i, j)){
             this.i = i; this.j = j;
-            this.cancel_skill()
+            this.after_moving()
             return true
         }
         else {
             return false
         }
+    }
+
+    after_moving(){
+        
     }
 
     push_on_vector(vector){
@@ -290,7 +281,7 @@ class Hero {
 
 
             if (this.game_state.is_out_of_map(next_i, next_j)) return 'wall'
-            let obj = this.game_state.find_obj_by_coords(next_i, next_j)
+            let obj = this.game_state.find_solid_obj_by_coords(next_i, next_j)
             if (obj){
                 if (obj.is_solid){
                     return obj
@@ -324,9 +315,9 @@ class Hero {
         if (this.hp > this.max_hp) this.hp = this.max_hp
     }
 
-    get_damage(damage){
+    get_damage(damage, attacker=null){
         if (this.solidity){
-            this.alive_effects.filter((eff)=>eff instanceof Solidity)[0].decrease()
+            this.alive_effects.filter((eff)=>eff instanceof Solidity)[0].decrease_duration()
             this.recalc_params()
             return
         }
@@ -334,32 +325,42 @@ class Hero {
         damage = this.damage_through_shields(damage)
         if (damage > 0){
             const u_damage = damage - this.armor
-            this.game_state.log(`${this.name} получил ${u_damage}/${damage} урона`)
-            this.loose_hp(u_damage)
+            this.game_state.log(`<b>${this.name}</b> получил ${u_damage}/${damage} урона`)
+            this.loose_hp(u_damage, attacker)
         }
     }
 
-    loose_hp(damage){
+    loose_hp(damage, attacker=null){
         this.hp -= damage
         if (this.hp <= 0){
-            this.die()
+            this.die(attacker)
         }
     }
 
-    die(){
+    die(attacker=null){
         this.is_alive = false
         this.i = -1
         this.j = -1
+
+        if (attacker) attacker.on_kill(this)
         // alert(`${this.name} is dead`)
     }
 
+    on_kill(target){
+
+    }
+
     be_attacked_animation(){
-        this.html_link.classList.add('attacked')
-        // this.cell_link.classList.add('attacked')
-        this.cell_link.querySelector('.hero_token').classList.add('bounced')
-        setTimeout(()=>{
-            this.cell_link.classList.remove('attacked')
-        }, 300)
+        if (this.html_link)
+            this.html_link.classList.add('attacked')
+
+        if (this.cell_link){
+            var c = this.cell_link.querySelector(`.${this.html_cell_class}`)
+            c.classList.add('bounced')
+            setTimeout(()=>{
+                c.classList.remove('bounced')
+            }, 300)
+        }
     }
 
     put_effects_on_autoattack(target){
@@ -369,8 +370,8 @@ class Hero {
     }
     
     make_autoattack(target){
-        this.game_state.log(`${this.name} нанес удар по ${target.name}`)
-        target.get_damage(this.power)
+        this.game_state.log(`<b>${this.name}</b> нанес удар по <b>${target.name}</b>`)
+        target.get_damage(this.power, this)
         this.put_effects_on_autoattack(target)
 
         this.energy -= this.attack_cost
@@ -421,28 +422,6 @@ class Hero {
         game_state.after_action()
     }
 
-    cancel_skill(redraw=true){
-        if (this.skill_chosen){
-            this.skills[this.skill_chosen-1].chosen = false
-            this.skill_chosen = null
-            this.left_click_listener = null
-            this.restore_standard_dop_marks_generators()
-        }
-        if (redraw) this.game_state.after_action()
-    }
-
-    skill_clicked(number, game_state){
-        if (this.skill_chosen === null){
-            this.skill_chosen = number
-            this.skills[number-1].start(game_state, this)
-        } else {
-            this.cancel_skill()
-        }
-
-        game_state.after_action()
-    }
-
-
     clone (){
         function deepclone(obj){
             return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj)
@@ -457,4 +436,4 @@ class Hero {
     }
 }
 
-export {Hero}
+export {Creature}

@@ -3,8 +3,10 @@ import { GameState } from "../classes/game_state.js"
 
 function make_hero_ref(hero){
     return {
+        type: hero.is_hero ? 'hero' : 'minion',
         team: hero.team,
-        index: hero.index  // FIXME: do it before game starts
+        index: hero.index,  // FIXME: do it before game starts
+        id: hero.id
     }
 }
 
@@ -13,7 +15,7 @@ function make_shield_mask(shield){
     var mask = {}
 
     for (let [key, value] of Object.entries(shield)){
-        if (['hero', 'caster'].includes(key)) continue
+        if (['hero', 'caster', 'game_state'].includes(key)) continue
 
         mask[key] = value
     }
@@ -78,11 +80,40 @@ function make_effect_mask(effect){
 }
 
 
+function make_tower_mask(tower){
+    var mask = {}
+
+    for (let [key, value] of Object.entries(tower)){
+        if (['game_state'].includes(key)) continue
+        if (['html_link', 'cell_link', 'dop_marks_generators'].includes(key)) continue
+
+        mask[key] = value
+    }
+    return mask
+}
+
+
+function make_minion_mask(minion){
+    var mask = {}
+
+    for (let [key, value] of Object.entries(minion)){
+        if (['game_state', 'effects', 'shields'].includes(key)) continue
+        if (['html_link', 'cell_link', 'dop_marks_generators'].includes(key)) continue
+
+        mask[key] = value
+    }
+
+    mask.shields = []
+    mask.effects = []
+    return mask
+}
+
+
 function make_game_state_mask(game_state){
     var mask = {}
 
     for (let [key, value] of Object.entries(game_state)){
-        if (['dom_helper', 'all_heroes', 'heroes1', 'heroes2', 'n', 'm', 'root', 'keyboard_setupped'].includes(key)) continue
+        if (['dom_helper', 'all_heroes', 'heroes1', 'heroes2', 'towers', 'minions', 'walls', 'n', 'm', 'root', 'keyboard_setupped'].includes(key)) continue
 
         mask[key] = value
     }
@@ -94,6 +125,8 @@ function make_total_mask(game_state){
     var mask = {
         heroes: [],
         effects: [],
+        towers: [],
+        minions: [],
         game_state: make_game_state_mask(game_state)
     }
 
@@ -106,6 +139,20 @@ function make_total_mask(game_state){
             mask.effects.push(make_effect_mask(effect))
         }
     }
+
+    for (let minion of game_state.minions){
+        mask.minions.push(make_minion_mask(minion))
+    }
+
+    for (let minion of game_state.minions){
+        for (let effect of minion.effects){
+            mask.effects.push(make_effect_mask(effect))
+        }
+    }
+
+    game_state.towers.forEach((tower)=>{
+        mask.towers.push(make_tower_mask(tower))
+    })
 
     return mask
 }

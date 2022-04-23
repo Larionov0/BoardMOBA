@@ -3,6 +3,7 @@ from django.http.response import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.shortcuts import redirect
+from Main.tools.make_mask import make_mask
 
 
 def hero_move(request, dir):
@@ -10,7 +11,7 @@ def hero_move(request, dir):
 
 
 def get_mask(request):
-    return JsonResponse({'mask': request.user.userprofile.lobby.json_data})
+    return JsonResponse(make_mask(request.user.userprofile.lobby.game_state))
 
 
 def set_mask(request):
@@ -22,8 +23,7 @@ def set_mask(request):
 
 def game(request):
     user = request.user
-    return render(request, 'index.html', {'team': list(user.userprofile.lobby.userprofiles.all()).index(user.userprofile) + 1,
-                                          'heroes': "{1: ['эмма', 'арни'],2: ['эмма', 'карл']}"})
+    return render(request, 'index.html', {'team': list(user.userprofile.lobby.userprofiles.all()).index(user.userprofile) + 1})
 
 
 # Create your views here.

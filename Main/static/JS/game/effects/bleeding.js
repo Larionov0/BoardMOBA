@@ -33,7 +33,7 @@ class Bleeding extends Effect {
 
     before_target_move(){
         this.game_state.log(`${this.hero.name} кровоистекает. Он потерял ${this.value} hp`)
-        this.hero.loose_hp(this.value)
+        this.hero.loose_hp(this.value, this.caster)
         this.decrease()
         this.hero.be_attacked_animation()
     }

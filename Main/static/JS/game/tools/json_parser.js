@@ -51,7 +51,8 @@ let replacer = (key, value)=>{
     }
     if (typeof value ==="object"){
         if (value !== null && value.constructor !== null)
-            value.__className = value.constructor.name
+            if (value.constructor.name != 'Object')
+                value.__className = value.constructor.name
     }
     return value
 }

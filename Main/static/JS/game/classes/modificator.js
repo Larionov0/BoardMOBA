@@ -22,6 +22,9 @@ class Modificator{
         
         if (this.type=='mult')
             razdel[this.param_name] *= this.value
+        
+        if (this.type=='set')
+            razdel[this.param_name] = this.value
     }
 
     decrease(){

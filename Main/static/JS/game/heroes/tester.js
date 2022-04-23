@@ -1,4 +1,4 @@
-import { Hero } from '../classes/hero.js'
+import { Hero } from '../classes/game_objects/hero.js'
 import { Skill } from "../classes/skill.js";
 import { marks_generator } from "../classes/marks_generator.js";
 import { distance } from "../tools/math_tools.js";

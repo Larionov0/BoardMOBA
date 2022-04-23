@@ -1,7 +1,9 @@
 body {
     font-family: 'Brush Script MT', cursive;
     cursor: default;
+    user-select:none
 }
+
 
 ::-webkit-scrollbar {
     width: 5px;

@@ -6,6 +6,7 @@ import { Slowdown } from "./slowdown.js";
 import { Solidity } from "./solidity.js";
 import { Stun } from "./stun.js";
 import { Toxicity } from "./toxicity.js";
+import { Silence } from "./silence.js";
 
 
-export {Bleeding, Burning, DelayedDamage, Poison, Slowdown, Solidity, Stun, Toxicity}
+export {Bleeding, Burning, DelayedDamage, Poison, Slowdown, Solidity, Stun, Toxicity, Silence}

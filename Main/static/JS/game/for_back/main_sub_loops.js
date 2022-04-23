@@ -36,6 +36,7 @@ function main_loop(){
 function post_mask(){
     fetch('/main/set_mask/', {
         method: 'POST',
+        headers: { "X-CSRFToken": csrf_token },
         body: sstringify( make_total_mask(window.main_game_state) )
     })
 }
@@ -61,9 +62,15 @@ function sub_loop(){
 }
 
 
+function get_mask(){
+    fetch('/main/get_mask/', {}).then((response)=>response.json()).then((data)=>{
+        console.log(data)
+    })
+}
+
+
 function on_first_open(){
-    if(team==1) on_first_open_main()
-    else on_first_open_sub()
+    get_mask()
 }
 
 

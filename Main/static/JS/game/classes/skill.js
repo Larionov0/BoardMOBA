@@ -28,6 +28,13 @@ class Skill {
 
         this.cur_cooldown = this.cooldown + 1
     }
+
+    reduce_cooldown(game_state, hero, duration_amount){
+        for (let i = 0; i < duration_amount; i++){
+            if (this.cur_cooldown==0) return
+            this.cooldown_down()
+        }
+    }
 }
 
 

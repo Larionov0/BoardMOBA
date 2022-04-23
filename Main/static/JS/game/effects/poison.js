@@ -13,7 +13,7 @@ class Poison extends DurableEffect {
 
     before_move(){
         this.game_state.log(`${this.hero.name} отравлен и потерял ${this.power} hp`)
-        this.hero.loose_hp(this.power)
+        this.hero.loose_hp(this.power, this.caster)
         this.decrease_duration()
         this.hero.be_attacked_animation()
     }

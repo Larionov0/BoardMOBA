@@ -1,4 +1,4 @@
-import { draw_all } from "./draw/draw_all.js"
+import { draw_all } from "../draw/draw_all.js"
 
 
 function deepclone(obj){
@@ -37,6 +37,14 @@ class DomHelper{
             row.querySelectorAll('.map_cell').forEach((cell, j)=>{
                 for (let hero of this.game_state.all_heroes){
                     if (hero.i == i && hero.j == j) hero.cell_link = cell
+                }
+
+                for (let tower of this.game_state.alive_towers){
+                    if ( tower.i <= i && i <= tower.end_i && tower.j <= j && j <= tower.end_j)  tower.cell_link = cell
+                }
+
+                for (let minion of this.game_state.minions){
+                    if (minion.i == i && minion.j == j) minion.cell_link = cell
                 }
             })
         })
@@ -87,6 +95,21 @@ class DomHelper{
         })
     }
 
+    set_up_upgrades_listeners(){
+        const hero = this.game_state.get_active_hero()
+        var params = [{i: 1, j: 0, par: 'max_hp'}, {i: 1, j: 1, par: 'max_energy'}, {i: 1, j: 2, par: 'armor'}, 
+                      {i: 3, j: 0, par: 'power'}, {i: 3, j: 1, par: 'magic'}, {i: 3, j: 2, par: 'attack_range'}]
+        hero.html_link.querySelectorAll('.table_row').forEach((row, i)=>{
+            row.querySelectorAll('.par_cell').forEach((par_cell, j)=>{
+                let n_params = params.filter((param)=>param.i==i && param.j == j)
+                if (n_params.length == 1){
+                    let param = n_params[0]
+                    par_cell.addEventListener('dblclick', ()=>{hero.try_to_upgrade_param(param.par)})
+                }
+            })
+        })
+    }
+
     set_up_event_listeners(){
         if (this.game_state.get_active_hero().team == window.team){
             console.log('LISTENERS SETTUPED')
@@ -95,6 +118,7 @@ class DomHelper{
             this.set_up_end_btn_listener()
             this.set_up_cells_listeners()
             this.set_up_skills_listeners()
+            this.set_up_upgrades_listeners()
         } else {
             if (window.keyboard_setupped) {
                 document.removeEventListener('keydown', window.keyboard_listener)
@@ -105,8 +129,15 @@ class DomHelper{
     }
 
     redraw_all (){
-        document.getElementsByTagName('body')[0].innerHTML = draw_all(this.game_state)
-        this.set_up_event_listeners()
+        var body = document.getElementsByTagName('body')[0]
+        var new_html = draw_all(this.game_state)
+
+        if (this.last_html != new_html){
+            console.log(`REDRAW ALL`)
+            body.innerHTML = new_html
+            this.last_html = new_html
+            this.set_up_event_listeners()
+        }
     }
 
     clear_all_listeners () {

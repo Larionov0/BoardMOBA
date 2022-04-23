@@ -55,11 +55,25 @@ class DurableEffect extends Effect {
 
     decrease_duration (){
         this.duration -= 1
-        if (this.duration <=0 ){
-            this.is_alive = false
-        }
+        if (this.duration <=0 ) this.is_alive = false
     }
 }
 
 
-export {Effect, DurableEffect}
+class SummaryDurableEffect extends DurableEffect {
+    on_getting(){
+        var sum_dur = 0
+        for (let effect of this.hero.effects){
+            if (effect.name==this.name){
+                sum_dur += effect.duration
+                effect.is_alive = false
+            }
+        }
+        
+        this.is_alive = true
+        this.value = sum_dur
+    }
+}
+
+
+export {Effect, DurableEffect, SummaryDurableEffect}

@@ -1,4 +1,4 @@
-import { Hero } from "../classes/hero.js";
+import { Hero } from "../classes/game_objects/hero.js";
 import { marks_generator } from "../classes/marks_generator.js";
 import { Skill } from "../classes/skill.js";
 import { DelayedDamage } from "../effects/delayed_damage.js";
@@ -6,6 +6,7 @@ import { Poison } from "../effects/poison.js";
 import { Slowdown } from "../effects/slowdown.js";
 import { Toxicity } from "../effects/toxicity.js";
 import { distance, get_vector, get_perp_vectors, calc_point } from "../tools/math_tools.js";
+import { Upgrades } from "../classes/upgrades.js";
 
 
 var skill1 = new Skill('подскок', 'skill1.png', 3, 1, 'Эмма перепрыгивает припятствия и приземляется на расстоянии до 2х клеток от себя, отравляя[[magic]|2] следующую автоатаку',
@@ -56,9 +57,9 @@ var skill2 = new Skill('тяжелый болт', 'skill2.png', 4, 2, 'Эмма 
             let bolt = [hero.i, hero.j]
             for (let i=0; i<3; i++){
                 bolt = calc_point(bolt, vector)
-                let target = game_state.find_hero_by_coords(bolt[0], bolt[1])
+                let target = game_state.find_obj_by_coords(bolt[0], bolt[1], true)
                 if (target !== null){
-                    target.get_damage(hero.magic * 2)
+                    target.get_damage(hero.magic * 2, hero)
                     target.be_attacked_animation()
                     target.get_effect(new Slowdown(target, game_state, 1, hero, 1))
                     skill.standard_aftercast(game_state, hero)
@@ -68,11 +69,11 @@ var skill2 = new Skill('тяжелый болт', 'skill2.png', 4, 2, 'Эмма 
                         setTimeout(()=>{
                             game_state.after_action()
 
-                            target.get_damage(hero.magic * 2)
+                            target.get_damage(hero.magic * 2, hero)
                             target.be_attacked_animation()
 
                             if (result instanceof Hero && result.team!=hero.team){
-                                result.get_damage(hero.magic)
+                                result.get_damage(hero.magic, hero)
                                 result.be_attacked_animation()
                                 result.get_effect(new Slowdown(target, game_state, 1, hero, 1))
                             }
@@ -95,9 +96,9 @@ var skill2 = new Skill('тяжелый болт', 'skill2.png', 4, 2, 'Эмма 
 var cast_skill3 = (i, j, game_state, hero, skill, generator)=>{
     let marks = hero.dop_marks_generators['skill1'](game_state, hero)
     for (let mark of marks){
-        let target = game_state.find_hero_by_coords(mark.i, mark.j)
+        let target = game_state.find_obj_by_coords(mark.i, mark.j, true)
         if (target && target.team != hero.team){
-            target.get_damage(hero.power)
+            target.get_damage(hero.power, hero)
             target.get_effect(new Poison(target, game_state, hero, hero.magic, 2))
             target.be_attacked_animation()
         }
@@ -173,20 +174,29 @@ var emma = ()=> new Hero({
     eng_name: 'emma',
     img_src: 'emma/emma.png',
     is_proto: true, initiative: 0, i:0, j:0,
-    hp: 40,
-    power: 8,
-    energy: 6,
-    armor: 0,
-    magic: 3,
+    // hp: 40,
+    // power: 8,
+    // energy: 6,
+    // armor: 0,
+    // magic: 3,
+    // attack_range: 3.5,
     color: 'blue',
-    attack_range: 3.3,
     token_img_src: 'emma_token.png',
     skills: [
         skill1,
         skill2,
         skill3,
         skill4
-    ]
+    ],
+    upgrades: new Upgrades({
+        max_hp: [{cost: 0, value: 40}, {cost: 25, value: 50}, {cost: 25, value: 60}],
+        max_energy: [{cost: 0, value: 6}, {cost: 25, value: 7}],
+        power: [{cost: 0, value: 8}, {cost: 30, value: 10}, {cost: 30, value: 12}],
+        armor: [{cost: 0, value: 0}, {cost: 30, value: 1}],
+        magic: [{cost: 0, value: 3}, {cost: 30, value: 5}, {cost: 30, value: 7}],
+        attack_range: [{cost: 0, value: 3.5}],
+        attack_cost: [{cost: 0, value: 2}]
+    })
 })
 
 

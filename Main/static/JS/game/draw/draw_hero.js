@@ -46,6 +46,9 @@ function draw_hero(hero, game_state){
     var dop_class = ''
     if (game_state.get_active_hero() == hero) dop_class = 'chosen'
 
+    var gen_par_cells_values = (params)=>{  // [{par: 'max_hp', value: `${hero.hp}/${hero.max_hp}`}]
+        return params.map((param)=>`<div class='par_cell' title='${!['gold', ''].includes(param.par) ? hero.upgrades.gen_string(param.par) : ''}' >${param.value}</div>`).join('\n')
+    }
     return `
     <div class="hero_card ${dop_class}">
         <div class="hero_first_row">
@@ -63,21 +66,29 @@ function draw_hero(hero, game_state){
                         <div class='par_cell' title='HP'>${insert_img('heart')}</div>
                         <div class='par_cell' title='energy'>${insert_img('energy')}</div>
                         <div class='par_cell' title='armor'>${insert_img('armor')}</div>
+                        <div class='par_cell' title='gold'>${insert_img('energy')}</div>
                     </div>
                     <div class='table_row'>
-                        <div class='par_cell'>${hero.hp}/${hero.max_hp}</div>
-                        <div class='par_cell'>${hero.energy}/${hero.max_energy}</div>
-                        <div class='par_cell'>${hero.armor}</div>
+                        ${gen_par_cells_values([
+                            {par: 'max_hp', value: `${hero.hp}/${hero.max_hp}`},
+                            {par: 'max_energy', value: `${hero.energy}/${hero.max_energy}`},
+                            {par: 'armor', value: `${hero.armor}`},
+                            {par: 'gold', value: `${hero.gold}`},
+                        ])}
                     </div>
                     <div class='table_row'>
                         <div class='par_cell' title='power'>${insert_img('power')}</div>
                         <div class='par_cell' title='magic'>${insert_img('magic')}</div>
                         <div class='par_cell' title='attack range'>${insert_img('attack_range')}</div>
+                        <div class='par_cell' title=''></div>
                     </div>
                     <div class='table_row'>
-                        <div class='par_cell'>${hero.power}</div>
-                        <div class='par_cell'>${hero.magic}</div>
-                        <div class='par_cell'>${hero.attack_range}</div>
+                        ${gen_par_cells_values([
+                            {par: 'power', value: `${hero.power}`},
+                            {par: 'magic', value: `${hero.magic}`},
+                            {par: 'attack_range', value: `${hero.attack_range}`},
+                            {par: '', value: ''},
+                        ])}
                     </div>
                 </div>
             </div>    

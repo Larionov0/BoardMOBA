@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='userprofile')
+    team = models.IntegerField(default=0)  # 1 / 2
     points = models.IntegerField(default=0)
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)

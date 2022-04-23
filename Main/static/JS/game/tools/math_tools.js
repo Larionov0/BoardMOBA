@@ -15,5 +15,14 @@ function calc_point(point1, vector){
     return [point1[0] + vector[0], point1[1] + vector[1]]
 }
 
+function get_surrounding_4_points(point){
+    return [
+        [point[0]-1, point[1]],
+        [point[0], point[1]+1],
+        [point[0]+1, point[1]],
+        [point[0], point[1]-1]
+    ]
+}
 
-export {distance, get_vector, get_perp_vectors, calc_point}
+
+export {distance, get_vector, get_perp_vectors, calc_point, get_surrounding_4_points}
