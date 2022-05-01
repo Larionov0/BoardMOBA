@@ -53,8 +53,6 @@ function on_mask_get(mask){
     let game_state = create_game_state_from_mask(mask)
     window.game_state = game_state
     game_state.dom_helper.redraw_all()
-
-    
 }
 
 function get_and_apply_mask(){

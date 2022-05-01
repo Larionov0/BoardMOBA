@@ -7,8 +7,11 @@ from Main.tools.make_mask import make_mask
 import json
 
 
-def hero_move(request, dir):
-    pass
+def end_turn(request):
+    game_state = request.user.userprofile.lobby.game_state
+    if game_state.get_active_hero().team == request.user.userprofile.team:
+        game_state.end_turn()
+        return JsonResponse({'ok': True})
 
 
 def wasd(request):
@@ -19,13 +22,6 @@ def wasd(request):
 
 def get_mask(request):
     return JsonResponse(make_mask(request.user.userprofile.lobby.game_state, request.user))
-
-
-def set_mask(request):
-    if request.method == 'POST':
-        request.user.userprofile.lobby.json_data = request.body.decode('utf-8')
-        request.user.userprofile.lobby.save()
-        return JsonResponse({'ok': True})
 
 
 def game(request):

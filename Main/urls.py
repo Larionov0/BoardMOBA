@@ -12,6 +12,6 @@ urlpatterns = [
 
     path('get_mask/', get_mask),
     path('wasd/', wasd),
-    path('set_mask/', set_mask)
+    path('end_turn/', end_turn)
 ]
 

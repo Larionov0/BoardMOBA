@@ -207,13 +207,16 @@ class GameState {
     }
 
     after_hero_move(){
-        this.get_active_hero().after_move(this)
+        // this.get_active_hero().after_move(this)
 
-        if (this.active_hero_index + 1 == this.all_heroes.length) this.end_turn(()=>{
-            if (! this.check_my_turn())  this.before_hero_move()
+        // if (this.active_hero_index + 1 == this.all_heroes.length) this.end_turn(()=>{
+        //     if (! this.check_my_turn())  this.before_hero_move()
+        // })
+        // else { this.active_hero_index += 1
+        //     if (! this.check_my_turn())  this.before_hero_move() }
+        fetch('/main/end_turn/').then((response)=>{
+            get_and_apply_mask()
         })
-        else { this.active_hero_index += 1
-            if (! this.check_my_turn())  this.before_hero_move() }
     }
 
     cell_clicked(cell_html, i, j){
