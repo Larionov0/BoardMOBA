@@ -69,11 +69,12 @@ class GameState(models.Model):
 
     def start_game(self, heroes_names={1: ['ren', 'arny'], 2: ['emma', 'karl']}):  # {1: ['ren', 'arny'], 2: ['emma', 'karl']}
         userprofiles = self.userprofiles.all()
+        u1, u2 = userprofiles[0], userprofiles[1]
+        u1.team = 1
+        u1.save()
 
-        userprofiles[0].team = 1
-        userprofiles[0].save()
-        userprofiles[1].team = 2
-        userprofiles[1].save()
+        u2.team = 2
+        u2.save()
 
         self.create_heroes(heroes_names)
 
@@ -88,9 +89,17 @@ class GameState(models.Model):
             random.shuffle(team_heroes)
             for i, hero in enumerate(team_heroes):
                 hero.index = i
+                hero.save()
 
+        all_heroes = list(self.all_heroes.all())
         for hero in all_heroes:
             hero.set_random_coords(self.n, self.m)
+
+    def get_active_hero(self):
+        return self.all_heroes.get(global_index=self.active_hero_index)
+
+    def wasd_pressed(self, dir):
+        self.get_active_hero().move(dir)
 
 
 class EventLog(models.Model):
@@ -140,6 +149,18 @@ class Hero(models.Model):
     def recalc_params(self):
         pass
 
+    def move(self, dir):
+        if dir == 'w':
+            self.i -= 1
+        elif dir == 'a':
+            self.j -= 1
+        elif dir == 's':
+            self.i += 1
+        elif dir == 'd':
+            self.j += 1
+        self.save()
+        return True
+
 
 class HeroParams(models.Model):
     # параметры, которые могут временно изменяться, но потом возвращаются в норму
@@ -154,6 +175,7 @@ class HeroParams(models.Model):
 
     slowdown = models.IntegerField(default=0)
     solidity = models.BooleanField(default=False)
+    silence = models.BooleanField(default=False)
     can_autoattack = models.BooleanField(default=True)
     stun = models.BooleanField(default=False)
 

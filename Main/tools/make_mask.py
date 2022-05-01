@@ -6,7 +6,16 @@ def make_game_state_mask(game_state):
 
 
 def make_hero_mask(hero):
-    return {key: value for key, value in hero.__dict__.items() if not key.startswith('_')}
+    hero_mask = {key: value for key, value in hero.__dict__.items() if not key.startswith('_')}
+    hero_mask['img_src'] = hero.hero_obj.img_src
+    hero_mask['token_img_src'] = hero.hero_obj.token_img_src
+
+    for key, value in hero.params.__dict__.items():
+        if not key.startswith('_'):
+            hero_mask[key] = value
+
+    hero_mask['color'] = hero.color
+    return hero_mask
 
 
 def make_heroes_mask(game_state):
@@ -17,12 +26,12 @@ def make_heroes_mask(game_state):
     return heroes_masks
 
 
-def make_mask(game_state):
+def make_mask(game_state, user):
     mask = {
         'game_state': make_game_state_mask(game_state),
-        'heroes': make_heroes_mask(game_state)
+        'heroes': make_heroes_mask(game_state),
+        'team': user.userprofile.team,
+        'my_turn': user.userprofile.team == game_state.get_active_hero().team
     }
 
     return mask
-
-

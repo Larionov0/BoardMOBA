@@ -11,6 +11,7 @@ urlpatterns = [
     path('check_game_start/', check_game_start, name='check_game_start'),
 
     path('get_mask/', get_mask),
+    path('wasd/', wasd),
     path('set_mask/', set_mask)
 ]
 

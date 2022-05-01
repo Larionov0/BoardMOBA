@@ -47,7 +47,7 @@ function draw_hero(hero, game_state){
     if (game_state.get_active_hero() == hero) dop_class = 'chosen'
 
     var gen_par_cells_values = (params)=>{  // [{par: 'max_hp', value: `${hero.hp}/${hero.max_hp}`}]
-        return params.map((param)=>`<div class='par_cell' title='${!['gold', ''].includes(param.par) ? hero.upgrades.gen_string(param.par) : ''}' >${param.value}</div>`).join('\n')
+        return params.map((param)=>`<div class='par_cell' title='' >${param.value}</div>`).join('\n')
     }
     return `
     <div class="hero_card ${dop_class}">

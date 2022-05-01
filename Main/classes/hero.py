@@ -20,7 +20,7 @@ class HeroObj:
 
     @property
     def img_src(self):
-        return f'{self.name}.png'
+        return f'{self.name}/{self.name}.png'
 
     @property
     def token_img_src(self):

@@ -111,7 +111,7 @@ class DomHelper{
     }
 
     set_up_event_listeners(){
-        if (this.game_state.get_active_hero().team == window.team){
+        if (this.game_state.my_turn){
             console.log('LISTENERS SETTUPED')
             this.link_heroes()
             this.set_up_wasd_listeners()

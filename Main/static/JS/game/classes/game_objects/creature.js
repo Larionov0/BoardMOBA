@@ -19,31 +19,24 @@ class Creature extends GameObject {
         this.img_src = img_src
         this.is_proto = is_proto
 
-        this.base_params = {
-            max_hp: hp,
-            max_energy: energy,
-            power: power,
-            armor: armor,
-            magic: magic,
-            attack_range: attack_range,
-            attack_cost: 2,
+        
+        this.max_hp= hp
+        this.max_energy= energy
+        this.power= power
+        this.armor= armor
+        this.magic= magic
+        this.attack_range= attack_range
+        this.attack_cost= 2
 
-            slowdown: 0,
-            silence: false,
-            solidity: false,
-            can_autoattack: true,
-            stun: false,
+        this.slowdown= 0,
+        this.silence= false,
+        this.solidity= false,
+        this.can_autoattack= true,
+        this.stun= false,
 
-            autoattack_effects: {
-                toxicity_value: 0,  // при ударах накладывать отравление
-                toxicity_duration: 0,
-            }
-        }
-
-        this.params = {
-            ...this.base_params,
-            // autoattack_effects: {...this.base_params.autoattack_effects}
-        }
+        this.toxicity_value= 0  // при ударах накладывать отравление
+        this.toxicity_duration= 0
+        
 
         this.hp = hp
         this.energy = energy,
@@ -52,6 +45,8 @@ class Creature extends GameObject {
         this.my_effects = []  // casted by me
         this.shields = []
         this.modificators = []
+
+        this.attacks_during_turn = 0
 
         
         this.color = color
@@ -64,7 +59,6 @@ class Creature extends GameObject {
         this.is_solid = true // we cannot move through it
         this.is_hero = false
         this.is_creature = true
-        this.attacks_during_turn = 0
 
         this.is_alive = true
 
@@ -79,18 +73,6 @@ class Creature extends GameObject {
         this.html_cell_class = 'creature'
         this.restore_standard_dop_marks_generators()  // функции, которые будут возвращать список меток
     }
-    get max_hp(){return this.params.max_hp}
-    get max_energy(){return this.params.max_energy}
-    get power(){return this.params.power}
-    get armor(){return this.params.armor}
-    get magic(){return this.params.magic}
-    get attack_range(){return this.params.attack_range}
-    get attack_cost(){return this.params.attack_cost}
-
-    get slowdown(){return this.params.slowdown}
-    get solidity(){return this.params.solidity}
-    get can_autoattack(){return this.params.can_autoattack}
-    
 
     // alive
     get alive_modificators(){return this.modificators.filter((mod)=>mod.is_alive)}

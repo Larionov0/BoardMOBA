@@ -1,13 +1,11 @@
 import { DomHelper } from "./dom_helper.js"
-import { getRandomInt } from "../tools/random.js"
-import { sub_loop } from "../for_back/main_sub_loops.js"
-import { post_mask } from "../for_back/main_sub_loops.js"
 import { distance } from "../tools/math_tools.js"
 import { Minion } from "./game_objects/map_objects/minion.js"
+import { get_and_apply_mask } from "../for_back/updater.js"
 
 
 class GameState {
-    constructor(heroes1, heroes2, active_hero_index=0, n=12, m=16, turn_number=0){
+    constructor(heroes1, heroes2, all_heroes, my_turn=false, active_hero_index=0, n=12, m=16, turn_number=0){
         this.dom_helper = new DomHelper(this)
 
         this.marks = []
@@ -16,7 +14,7 @@ class GameState {
         this.towers = []
         this.minions = []
 
-        this.all_heroes = []
+        this.all_heroes = all_heroes
         this.heroes1 = heroes1
         this.heroes2 = heroes2
         this.active_hero_index = active_hero_index
@@ -25,11 +23,11 @@ class GameState {
 
         this.logs = []
         this.keyboard_setupped = false
-        window.game_state.push(this)
 
         this.turn_number = turn_number
         this.minions_spawn_points = []  // [{i, j, type}]
         this.heroes_spawn_points = {1: [], 2: []}
+        this.my_turn = my_turn
     }
 
     get alive_heroes(){ return this.all_heroes.filter((obj)=>obj.is_alive) }
@@ -229,7 +227,13 @@ class GameState {
     }
 
     wasd_pressed(key){
-        this.get_active_hero().wasd_pressed(key, this)
+        fetch('/main/wasd/', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf_token },
+            body: JSON.stringify({'key': key})
+        }).then((responce)=>{
+            get_and_apply_mask()
+        })
     }
 
     after_action(){

@@ -4,14 +4,21 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from django.shortcuts import redirect
 from Main.tools.make_mask import make_mask
+import json
 
 
 def hero_move(request, dir):
     pass
 
 
+def wasd(request):
+    key = json.loads(request.body)['key']
+    request.user.userprofile.lobby.game_state.wasd_pressed(key)
+    return get_mask(request)
+
+
 def get_mask(request):
-    return JsonResponse(make_mask(request.user.userprofile.lobby.game_state))
+    return JsonResponse(make_mask(request.user.userprofile.lobby.game_state, request.user))
 
 
 def set_mask(request):
