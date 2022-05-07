@@ -46,6 +46,7 @@ function create_game_state_from_mask(mask){  // mask -> game_state
     apply_mask_to_game_state(mask, game_state)
 
     window.team = mask.team
+    game_state.marks = mask.marks
     return game_state
 }
 

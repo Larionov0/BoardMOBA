@@ -26,12 +26,17 @@ def make_heroes_mask(game_state):
     return heroes_masks
 
 
+def make_marks_mask(game_state):
+    return [mark.__dict__ for mark in game_state.generate_marks()]
+
+
 def make_mask(game_state, user):
     mask = {
         'game_state': make_game_state_mask(game_state),
         'heroes': make_heroes_mask(game_state),
         'team': user.userprofile.team,
-        'my_turn': user.userprofile.team == game_state.get_active_hero().team
+        'my_turn': user.userprofile.team == game_state.get_active_hero().team,
+        'marks': make_marks_mask(game_state)
     }
 
     return mask

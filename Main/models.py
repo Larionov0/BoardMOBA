@@ -2,6 +2,7 @@ from django.db import models
 import random
 from Main.classes.heroes.all_heroes import all_heroes
 from Main.tools.math_tools import distance
+from Main.classes.marks_generator import MarksGenerator
 
 
 class Lobby(models.Model):
@@ -144,6 +145,10 @@ class GameState(models.Model):
     def cell_rightclicked(self, i, j):
         self.get_active_hero().cell_rightclicked(i, j)
 
+    def generate_marks(self):
+        return self.get_active_hero().generate_marks()
+
+
 
 class EventLog(models.Model):
     message = models.CharField(max_length=120, default='', blank=True)
@@ -176,6 +181,19 @@ class Hero(models.Model):
     @property
     def hero_obj(self):
         return all_heroes[self.name]
+
+    def generate_move_marks(self):
+        radius = self.energy // (self.params.slowdown+1)
+        return MarksGenerator().circle_list(self.i, self.j, radius, color='rgba(0, 200, 50, 0.2)')
+
+    def generate_attack_marks(self):
+        marks = []
+        if self.params.can_autoattack and self.energy >= self.params.attack_cost:
+            marks = MarksGenerator().circle_list(self.i, self.j, self.params.attack_range, color='rgba(255, 0, 0, 0.2)')
+        return marks
+
+    def generate_marks(self):
+        return [*self.generate_move_marks(), *self.generate_attack_marks()]
 
     def set_random_coords(self, n, m):
         self.i = random.randint(0, n-1)
