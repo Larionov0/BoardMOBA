@@ -7,6 +7,12 @@ from Main.tools.make_mask import make_mask
 import json
 
 
+def cell_rightclicked(request):
+    data = json.loads(request.body)
+    request.user.userprofile.lobby.game_state.cell_rightclicked(data['i'], data['j'])
+    return JsonResponse({'ok': True})
+
+
 def end_turn(request):
     game_state = request.user.userprofile.lobby.game_state
     if game_state.get_active_hero().team == request.user.userprofile.team:

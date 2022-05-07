@@ -220,13 +220,18 @@ class GameState {
     }
 
     cell_clicked(cell_html, i, j){
-        console.log(`click on ${i} ${j}`)
         this.get_active_hero().cell_clicked(i, j, this)
     }
 
     cell_rightclicked(cell_html, i, j){
-        console.log(`Right click on ${i} ${j}`)
-        this.get_active_hero().cell_rightclicked(i, j, this)
+        // this.get_active_hero().cell_rightclicked(i, j, this)
+        fetch('/main/cell_rightclicked/', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf_token },
+            body: JSON.stringify({i: i, j: j})
+        }).then((response)=>{
+            get_and_apply_mask()
+        })
     }
 
     wasd_pressed(key){

@@ -1,6 +1,7 @@
 from django.db import models
 import random
 from Main.classes.heroes.all_heroes import all_heroes
+from Main.tools.math_tools import distance
 
 
 class Lobby(models.Model):
@@ -113,6 +114,14 @@ class GameState(models.Model):
         else:
             return objects[0]
 
+    def get_all_creatures(self):
+        return [*list(self.all_heroes.all())]
+
+    def get_creature_by_coords(self, i, j):
+        obj = self.get_solid_obj_by_coords(i, j)
+        if obj.is_creature:
+            return obj
+
     def can_move_to_point(self, i, j):
         if not (0 <= i < self.n and 0 <= j < self.m):
             return False
@@ -132,6 +141,9 @@ class GameState(models.Model):
 
         self.get_active_hero().before_move()
 
+    def cell_rightclicked(self, i, j):
+        self.get_active_hero().cell_rightclicked(i, j)
+
 
 class EventLog(models.Model):
     message = models.CharField(max_length=120, default='', blank=True)
@@ -139,6 +151,8 @@ class EventLog(models.Model):
 
 
 class Hero(models.Model):
+    is_creature = True
+
     name = models.CharField(default='Hero', max_length=30)
     eng_name = models.CharField(default='Hero', max_length=30)
     i = models.IntegerField(default=0)
@@ -177,8 +191,16 @@ class Hero(models.Model):
     def color(self):
         return 'rgba(0, 0, 255, 0.3)' if self.team == 1 else 'rgba(255, 0, 0, 0.3)'
 
-    def recalc_params(self):
-        pass
+    @property
+    def coords(self):
+        return [self.i, self.j]
+
+    def recalc_params(self):  # FIXME: доделать когда появятся еффекты
+        if self.attacks_during_turn > 0:
+            self.params.can_autoattack = False
+        else:
+            self.params.can_autoattack = True
+        self.params.save()
 
     def move(self, dir):
         if self.energy > self.params.slowdown:
@@ -203,10 +225,55 @@ class Hero(models.Model):
 
     def before_move(self):
         self.energy = self.params.max_energy
+        self.attacks_during_turn = 0
+        self.recalc_params()
         self.save()
 
     def after_move(self):
         pass
+
+    def cell_rightclicked(self, i, j):
+        if self.params.can_autoattack:
+            self.try_make_autoattack(i, j)
+
+    def try_make_autoattack(self, i, j):
+        target = self.game_state.get_creature_by_coords(i, j)
+
+        if target is None:
+            return False
+        if self.energy < self.params.attack_cost:
+            return False
+        if self.team == target.team:
+            return False
+        if distance(self.coords, target.coords) > self.params.attack_range:
+            return False
+
+        self.make_autoattack(target)
+        return True
+
+    def make_autoattack(self, target):
+        target.get_damage(self.params.power)
+        self.energy -= self.params.attack_cost
+        self.attacks_during_turn += 1
+        self.save()
+        self.recalc_params()
+
+    def get_damage(self, damage):
+        remaining_damage = damage - self.params.armor
+        if remaining_damage > 0:
+            self.loose_hp(remaining_damage)
+
+    def loose_hp(self, damage):
+        self.hp -= damage
+        self.save()
+        if self.hp <= 0:
+            self.die()
+
+    def die(self):
+        self.is_alive = False
+        self.i = -1
+        self.j = -1
+        self.save()
 
 
 class HeroParams(models.Model):

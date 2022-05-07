@@ -61,7 +61,6 @@ class DomHelper{
                     this.game_state.cell_clicked(cell, i, j)
                 })
                 cell.oncontextmenu = ()=>{
-                    console.log(this.game_state === game_state[1]);
                     this.game_state.cell_rightclicked(cell, i, j)
                     return false
                 }
