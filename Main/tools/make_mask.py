@@ -11,7 +11,7 @@ def make_hero_mask(hero):
     hero_mask['token_img_src'] = hero.hero_obj.token_img_src
 
     for key, value in hero.params.__dict__.items():
-        if not key.startswith('_'):
+        if not key.startswith('_') and key != 'id':
             hero_mask[key] = value
 
     hero_mask['color'] = hero.color
@@ -30,13 +30,20 @@ def make_marks_mask(game_state):
     return [mark.__dict__ for mark in game_state.generate_marks()]
 
 
-def make_mask(game_state, user):
+def make_mask(game_state, user, local_update_id):
+    ui_actions = list(game_state.uiaction_set.filter(update_id__gt=local_update_id).order_by('update_id'))
+
+    if len(ui_actions) == 0:
+        return {'blank': True}
+
     mask = {
         'game_state': make_game_state_mask(game_state),
         'heroes': make_heroes_mask(game_state),
         'team': user.userprofile.team,
         'my_turn': user.userprofile.team == game_state.get_active_hero().team,
-        'marks': make_marks_mask(game_state)
+        'marks': make_marks_mask(game_state),
+        'ui_actions': [action.to_json() for action in ui_actions],
+        'update_id': ui_actions[-1].update_id
     }
 
     return mask

@@ -50,14 +50,42 @@ function create_game_state_from_mask(mask){  // mask -> game_state
     return game_state
 }
 
+
+function apply_ui_action(mask, ui_action){
+    if (ui_action.type == 'redraw'){
+        console.log('redraw');
+        let game_state = create_game_state_from_mask(mask)
+        window.game_state = game_state
+        game_state.dom_helper.redraw_all()
+    } else if (ui_action.type == 'damage'){
+        console.log('damage')
+        let target = window.game_state.find_creature_by_id(ui_action.target_id)
+        target.be_attacked_animation()
+    }
+}
+
+
 function on_mask_get(mask){
-    let game_state = create_game_state_from_mask(mask)
-    window.game_state = game_state
-    game_state.dom_helper.redraw_all()
+    if (mask.blank === true){ console.log('mask is blank'); return }
+    
+    window.update_id = mask.update_id
+    window.can_update = false
+
+    var base_timeout = 0
+    for (let ui_action of mask.ui_actions){
+        setTimeout(()=>apply_ui_action(mask, ui_action), base_timeout * 1000)
+        base_timeout += ui_action.duration
+    }
+
+    setTimeout(()=>{window.can_update = true}, base_timeout * 1000)
 }
 
 function get_and_apply_mask(){
-    fetch('/main/get_mask/', {}).then((response)=>response.json()).then(on_mask_get)
+    fetch('/main/get_mask/', {
+        method: 'POST',
+        headers: {'X-CSRF-TOKEN': csrf_token},
+        body: JSON.stringify({'update_id': window.update_id})
+    }).then((response)=>response.json()).then(on_mask_get)
 }
 
 export {get_and_apply_mask }

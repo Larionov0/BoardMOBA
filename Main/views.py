@@ -23,11 +23,12 @@ def end_turn(request):
 def wasd(request):
     key = json.loads(request.body)['key']
     request.user.userprofile.lobby.game_state.wasd_pressed(key)
-    return get_mask(request)
+    return JsonResponse({'ok': True})
 
 
 def get_mask(request):
-    return JsonResponse(make_mask(request.user.userprofile.lobby.game_state, request.user))
+    local_update_id = json.loads(request.body)['update_id']
+    return JsonResponse(make_mask(request.user.userprofile.lobby.game_state, request.user, local_update_id))
 
 
 def game(request):

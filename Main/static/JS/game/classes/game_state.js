@@ -103,6 +103,12 @@ class GameState {
         return null
     }
 
+    find_creature_by_id (id){
+        for (let hero of this.all_heroes){
+            if (hero.id == id) return hero
+        }
+    }
+
     get_all_game_objects(){
         return [...this.all_heroes, ...this.walls, ...this.alive_tower_parts, ...this.alive_minions]
     }

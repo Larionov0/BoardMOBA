@@ -110,9 +110,9 @@ class DomHelper{
     }
 
     set_up_event_listeners(){
+        this.link_heroes()
         if (this.game_state.my_turn){
             console.log('LISTENERS SETTUPED')
-            this.link_heroes()
             this.set_up_wasd_listeners()
             this.set_up_end_btn_listener()
             this.set_up_cells_listeners()
