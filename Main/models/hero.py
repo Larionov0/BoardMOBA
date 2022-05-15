@@ -4,6 +4,7 @@ from Main.classes.heroes.all_heroes import all_heroes
 from .hero_params import HeroParams
 import random
 from Main.tools.math_tools import distance
+from Main.models.marks_rule import *
 
 
 class Hero(models.Model):
@@ -33,18 +34,39 @@ class Hero(models.Model):
     def hero_obj(self):
         return all_heroes[self.name]
 
-    def generate_move_marks(self):
-        radius = self.energy // (self.params.slowdown+1)
-        return MarksGenerator().circle_list(self.i, self.j, radius, color='rgba(0, 200, 50, 0.2)')
+    # def generate_move_marks(self):
+    #     radius = self.energy // (self.params.slowdown+1)
+    #     return MarksGenerator().circle_list(self.i, self.j, radius, color='rgba(0, 200, 50, 0.2)')
+    #
+    # def generate_attack_marks(self):
+    #     marks = []
+    #     if self.params.can_autoattack and self.energy >= self.params.attack_cost:
+    #         marks = MarksGenerator().circle_list(self.i, self.j, self.params.attack_range, color='rgba(255, 0, 0, 0.2)')
+    #     return marks
+    #
+    # def generate_base_marks(self):
+    #     return [*self.generate_move_marks(), *self.generate_attack_marks()]
 
-    def generate_attack_marks(self):
-        marks = []
+    def generate_base_marks_rules(self):
+        self.game_state.clear_all_marks_rules()
+        MarksRule.objects.create(
+            marks_form=Circle.objects.create(
+                i=self.i, j=self.j,
+                r=self.energy // (self.params.slowdown+1),
+                color='rgba(0, 200, 50, 0.2)'
+            ),
+            name='move',
+            game_state=self.game_state
+        )
         if self.params.can_autoattack and self.energy >= self.params.attack_cost:
-            marks = MarksGenerator().circle_list(self.i, self.j, self.params.attack_range, color='rgba(255, 0, 0, 0.2)')
-        return marks
-
-    def generate_marks(self):
-        return [*self.generate_move_marks(), *self.generate_attack_marks()]
+            MarksRule.objects.create(
+                marks_form=Circle.objects.create(
+                    i=self.i, j=self.j,
+                    r=self.params.attack_range, color='rgba(255, 0, 0, 0.2)'
+                ),
+                name='attack',
+                game_state=self.game_state
+            )
 
     def set_random_coords(self, n, m):
         self.i = random.randint(0, n-1)
@@ -89,6 +111,7 @@ class Hero(models.Model):
 
                 self.energy -= 1 + self.params.slowdown
                 self.save()
+                self.generate_base_marks_rules()
                 self.game_state.create_ui_redraw()
                 return True
         return False
@@ -98,6 +121,7 @@ class Hero(models.Model):
         self.attacks_during_turn = 0
         self.recalc_params()
         self.save()
+        self.generate_base_marks_rules()
 
     def after_move(self):
         pass
@@ -128,6 +152,7 @@ class Hero(models.Model):
         self.save()
         self.recalc_params()
         self.game_state.create_ui_action('damage', target.id, duration=0.3)
+        self.generate_base_marks_rules()
         self.game_state.create_ui_redraw()
 
     def get_damage(self, damage):

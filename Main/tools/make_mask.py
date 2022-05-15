@@ -1,3 +1,6 @@
+from Main.tools.time_decorator import time_decorator
+
+
 def make_game_state_mask(game_state):
     return {
         'active_hero_index': game_state.active_hero_index,
@@ -27,7 +30,11 @@ def make_heroes_mask(game_state):
 
 
 def make_marks_mask(game_state):
-    return [mark.__dict__ for mark in game_state.generate_marks()]
+    marks = []
+    for rule in game_state.marksrule_set.all():
+        for mark in rule.generate_marks():
+            marks.append(mark.__dict__)
+    return marks
 
 
 def make_mask(game_state, user, local_update_id):

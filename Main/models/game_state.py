@@ -2,6 +2,7 @@ from django.db import models
 from Main.classes.heroes.all_heroes import all_heroes
 from .hero_params import HeroParams
 from .hero import Hero
+from Main.models.skill import Skill
 import random
 from .ui_action import UIAction
 
@@ -32,7 +33,7 @@ class GameState(models.Model):
                 params = base_params
                 params.pk = None
                 params.save()
-                Hero.objects.create(
+                hero = Hero.objects.create(
                     name=name,
                     eng_name=name,
                     game_state=self,
@@ -42,6 +43,14 @@ class GameState(models.Model):
                     hp=proto_hero.max_hp,
                     energy=proto_hero.max_energy
                 )
+
+                for skill in proto_hero.skills:
+                    Skill.objects.create(
+                        hero=hero,
+                        name=skill.name,
+                        cooldown=skill.cooldown,
+                        energy=skill.energy
+                    )
 
     @property
     def userprofiles(self):
@@ -96,6 +105,9 @@ class GameState(models.Model):
         return [*list(self.all_heroes.all())]
 
     def get_solid_obj_by_coords(self, i, j):
+        if i<0 or i>=self.n or j<0 or j>=self.m:
+            return {'solid': True, 'object': 'wall'}
+
         objects = [obj for obj in self.get_all_solid_objects() if obj.i == i and obj.j == j]
         if len(objects) == 0:
             return None
@@ -133,5 +145,8 @@ class GameState(models.Model):
     def cell_rightclicked(self, i, j):
         self.get_active_hero().cell_rightclicked(i, j)
 
-    def generate_marks(self):
-        return self.get_active_hero().generate_marks()
+    def generate_marks_rules(self):
+        return self.get_active_hero().generate_base_marks_rules()
+
+    def clear_all_marks_rules(self):
+        self.marksrule_set.all().delete()
