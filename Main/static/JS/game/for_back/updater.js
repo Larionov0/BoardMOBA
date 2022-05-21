@@ -66,7 +66,7 @@ function apply_ui_action(mask, ui_action){
 
 
 function on_mask_get(mask){
-    if (mask.blank === true){ console.log('mask is blank'); return }
+    if (mask.blank === true){ console.log(window.update_id); console.log('mask is blank'); return }
     
     window.update_id = mask.update_id
     window.can_update = false

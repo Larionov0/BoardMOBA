@@ -1,4 +1,5 @@
 import { draw_all } from "../draw/draw_all.js"
+import { get_and_apply_mask } from "../for_back/updater.js"
 
 
 function deepclone(obj){
@@ -58,7 +59,13 @@ class DomHelper{
         document.querySelectorAll('.map_row').forEach((row, i)=>{
             row.querySelectorAll('.map_cell').forEach((cell, j)=>{
                 cell.addEventListener('click', ()=>{
-                    this.game_state.cell_clicked(cell, i, j)
+                    // this.game_state.cell_clicked(cell, i, j)
+                    // FIXME: check if active skill
+                    fetch('/main/cell_clicked/', {
+                        method: "POST",
+                        headers: {'X-CSRF-TOKEN': csrf_token},
+                        body: JSON.stringify({'i': i, 'j': j})
+                    }).then( ()=>get_and_apply_mask() )
                 })
                 cell.oncontextmenu = ()=>{
                     this.game_state.cell_rightclicked(cell, i, j)
@@ -90,7 +97,14 @@ class DomHelper{
     set_up_skills_listeners(){
         const hero = this.game_state.get_active_hero()
         hero.html_link.querySelectorAll('.skill').forEach((skill, i)=>{
-            skill.addEventListener('click', (e)=>{hero.skill_clicked(i+1, this.game_state)})
+            skill.addEventListener('click', (e)=>{
+                // hero.skill_clicked(i+1, this.game_state)
+                fetch('/main/skill_clicked/', {
+                    method: "POST",
+                    headers: {'X-CSRF-TOKEN': csrf_token},
+                    body: JSON.stringify({'skill_number': i+1})
+                }).then( ()=>get_and_apply_mask() )
+            })
         })
     }
 

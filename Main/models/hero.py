@@ -124,7 +124,8 @@ class Hero(models.Model):
         self.generate_base_marks_rules()
 
     def after_move(self):
-        pass
+        for skill in self.skills.all():
+            skill.after_move(self)
 
     def cell_rightclicked(self, i, j):
         if self.params.can_autoattack:
@@ -170,4 +171,27 @@ class Hero(models.Model):
         self.is_alive = False
         self.i = -1
         self.j = -1
+        self.save()
+
+    def skill_clicked(self, game_state, skill_number):
+        skill = self.skills.get(number=skill_number)
+        if skill.chosen:
+            skill.cancel(game_state)
+        else:
+            if skill.is_available(self):
+                skill.chosen = True
+                skill.phase = 0
+                skill.save()
+                skill.run_current_phase(game_state, self, None, None)
+
+    def cell_clicked(self, game_state, i, j):
+        skills = self.skills.filter(chosen=True)
+        if skills.count() == 0:
+            return
+        else:
+            skills[0].run_current_phase(game_state, self, i, j)
+
+    def teleport(self, i, j):
+        self.i = i
+        self.j = j
         self.save()

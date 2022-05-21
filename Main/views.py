@@ -7,6 +7,18 @@ from Main.tools.make_mask import make_mask
 import json
 
 
+def cell_clicked(request):
+    data = json.loads(request.body)
+    request.user.userprofile.lobby.game_state.cell_clicked(data['i'], data['j'])
+    return JsonResponse({'ok': True})
+
+
+def skill_clicked(request):
+    data = json.loads(request.body)
+    request.user.userprofile.lobby.game_state.skill_clicked(data['skill_number'])
+    return JsonResponse({'ok': True})
+
+
 def cell_rightclicked(request):
     data = json.loads(request.body)
     request.user.userprofile.lobby.game_state.cell_rightclicked(data['i'], data['j'])
@@ -28,6 +40,7 @@ def wasd(request):
 
 def get_mask(request):
     local_update_id = json.loads(request.body)['update_id']
+    game_state = request.user.userprofile.lobby.game_state
     return JsonResponse(make_mask(request.user.userprofile.lobby.game_state, request.user, local_update_id))
 
 

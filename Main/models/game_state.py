@@ -44,12 +44,13 @@ class GameState(models.Model):
                     energy=proto_hero.max_energy
                 )
 
-                for skill in proto_hero.skills:
+                for number, skill in enumerate(proto_hero.skills, 1):
                     Skill.objects.create(
                         hero=hero,
                         name=skill.name,
                         cooldown=skill.cooldown,
-                        energy=skill.energy
+                        energy=skill.energy,
+                        number=number
                     )
 
     @property
@@ -119,7 +120,7 @@ class GameState(models.Model):
 
     def get_creature_by_coords(self, i, j):
         obj = self.get_solid_obj_by_coords(i, j)
-        if obj.is_creature:
+        if obj and obj.is_creature:
             return obj
 
     def can_move_to_point(self, i, j):
@@ -144,6 +145,12 @@ class GameState(models.Model):
 
     def cell_rightclicked(self, i, j):
         self.get_active_hero().cell_rightclicked(i, j)
+
+    def cell_clicked(self, i, j):
+        self.get_active_hero().cell_clicked(self, i, j)
+
+    def skill_clicked(self, skill_number):
+        self.get_active_hero().skill_clicked(self, skill_number)
 
     def generate_marks_rules(self):
         return self.get_active_hero().generate_base_marks_rules()

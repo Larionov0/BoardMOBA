@@ -18,6 +18,7 @@ def make_hero_mask(hero):
             hero_mask[key] = value
 
     hero_mask['color'] = hero.color
+    hero_mask['skills'] = [skill.to_dict() for skill in hero.skills.all()]
     return hero_mask
 
 
