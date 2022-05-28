@@ -2,6 +2,7 @@ from Main.classes.hero import HeroObj, SkillObj
 from Main.models.marks_rule import *
 from Main.models.effects.bleeding import Bleeding
 from Main.models.effects.effect_link import EffectLink
+from Main.models.modifier import Modifier
 
 
 def s1p0(game_state, hero, skill, i=None, j=None):
@@ -69,10 +70,33 @@ skill3 = SkillObj('лобокол', 'skill3.png', 4, 3,
                   lambda: True)
 
 
+def s4p0(game_state, hero, skill, i=None, j=None):
+    hero.get_modifier(Modifier.objects.create(
+        hero=hero,
+        param_name='armor',
+        value=2,
+        duration=3
+    ))
+    hero.get_modifier(Modifier.objects.create(
+        hero=hero,
+        param_name='max_energy',
+        value=2,
+        duration=3
+    ))
+    hero.get_modifier(Modifier.objects.create(
+        hero=hero,
+        param_name='magic',
+        value=2,
+        duration=3
+    ))
+    skill.aftercast(game_state, hero)
+    game_state.create_ui_redraw()
+
+
 skill4 = SkillObj('ядовитые щупальца', 'skill4.png', 8, 3,
                   'Арни запускает ядовитые железы, его удары становятся ядовитыми[[магия//2] | 1] '
                   'и он получает улучшение на 3 хода: броня+2 | макс энергия+2 | магия+2',
-                  lambda: True)
+                  [s4p0])
 
 
 arny = HeroObj('arny', 60, 6, 5, 2, 8, 1.5, 2, [skill1, skill2, skill3, skill4])

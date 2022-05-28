@@ -87,10 +87,17 @@ class Hero(models.Model):
         return [self.i, self.j]
 
     def recalc_params(self):  # FIXME: доделать когда появятся еффекты
-        if self.attacks_during_turn > 0:
-            self.params.can_autoattack = False
-        else:
-            self.params.can_autoattack = True
+        params = self.base_params
+        params.pk = None
+        params.save()
+
+        self.params = params
+        self.save()
+
+        for modifier in self.modifiers.filter(is_alive=True):
+            modifier.modify(self.params)
+
+        self.params.can_autoattack = self.attacks_during_turn > 0
         self.params.save()
 
     def move(self, dir):
@@ -156,6 +163,10 @@ class Hero(models.Model):
         for effect_link in self.alive_my_effects:
             effect_link.effect.after_move(effect_link)
 
+        for modifier in self.modifiers.filter(is_alive=True):
+            modifier.decrease()
+        self.recalc_params()
+
     def cell_rightclicked(self, i, j):
         if self.params.can_autoattack:
             self.try_make_autoattack(i, j)
@@ -182,6 +193,9 @@ class Hero(models.Model):
         self.save()
         self.recalc_params()
         self.game_state.create_ui_action('damage', target.id, duration=0.3)
+
+        self.recalc_params()
+
         self.generate_base_marks_rules()
         self.game_state.create_ui_redraw()
 
@@ -222,6 +236,11 @@ class Hero(models.Model):
 
     def get_effect(self, effect_link):
         effect_link.effect.on_getting(effect_link)
+        self.recalc_params()
+
+    def get_modifier(self, modifier, recalc=True):
+        if recalc:
+            self.recalc_params()
 
     def teleport(self, i, j):
         self.i = i
