@@ -17,3 +17,4 @@ urlpatterns = [
     path('cell_clicked/', cell_clicked),
     path('skill_clicked/', skill_clicked)
 ]
+

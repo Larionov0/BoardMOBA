@@ -19,6 +19,9 @@ def make_hero_mask(hero):
 
     hero_mask['color'] = hero.color
     hero_mask['skills'] = [skill.to_dict() for skill in hero.skills.all()]
+
+    hero_mask['effects'] = [effect_link.to_dict() for effect_link in hero.alive_effects]
+    hero_mask['my_effects'] = [effect_link.to_dict() for effect_link in hero.alive_my_effects]
     return hero_mask
 
 

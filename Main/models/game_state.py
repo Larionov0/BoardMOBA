@@ -5,6 +5,7 @@ from .hero import Hero
 from Main.models.skill import Skill
 import random
 from .ui_action import UIAction
+import json
 
 
 class GameState(models.Model):
@@ -12,6 +13,17 @@ class GameState(models.Model):
     n = models.IntegerField(default=12)
     m = models.IntegerField(default=12)
     update_id = models.IntegerField(default=1)
+
+    active_hero_json = models.TextField(max_length=100, default='{}')  # дополнительные параметры для скиллов активного героя (например, сохранять координаты с одной фазы для использования в другой фазе)
+
+    @property
+    def active_hero_dict(self):
+        return json.loads(self.active_hero_json)
+
+    @active_hero_dict.setter
+    def active_hero_dict(self, dct):
+        self.active_hero_json = json.dumps(dct)
+        self.save()
 
     def check_if_can_move_to_point(self, i, j):
         pass

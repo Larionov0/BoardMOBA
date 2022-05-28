@@ -1,5 +1,7 @@
 from Main.classes.hero import HeroObj, SkillObj
 from Main.models.marks_rule import *
+from Main.models.effects.bleeding import Bleeding
+from Main.models.effects.effect_link import EffectLink
 
 
 def s1p0(game_state, hero, skill, i=None, j=None):
@@ -30,6 +32,13 @@ def s1p1(game_state, hero, skill, i=None, j=None):
                     # cast
                     target.teleport(point[0], point[1])
                     target.get_damage(hero.params.magic)
+                    target.get_effect(EffectLink.objects.create(
+                        hero=target,
+                        caster=hero,
+                        effect=Bleeding.objects.create(
+                            duration=2
+                        )
+                    ))
                     skill.aftercast(game_state, hero)
                     hero.generate_base_marks_rules()
                     game_state.create_ui_redraw()

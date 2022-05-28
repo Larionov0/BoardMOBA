@@ -116,16 +116,45 @@ class Hero(models.Model):
                 return True
         return False
 
+    @property
+    def alive_effects(self):
+        return self.effects.filter(is_alive=True)
+
+    @property
+    def alive_my_effects(self):
+        return self.my_effects.filter(is_alive=True)
+
+    def clear_dead_effects(self):
+        for effect_link in self.my_effects.filter(is_alive=False):
+            effect_link.effect.delete()
+        self.my_effects.filter(is_alive=False).delete()
+
+        for effect_link in self.effects.filter(is_alive=False):
+            effect_link.effect.delete()
+        self.effects.filter(is_alive=False).delete()
+
     def before_move(self):
         self.energy = self.params.max_energy
         self.attacks_during_turn = 0
         self.recalc_params()
         self.save()
+
+        for effect_link in self.alive_effects:
+            effect_link.effect.before_target_move(effect_link)
+        for effect_link in self.alive_my_effects:
+            effect_link.effect.before_move(effect_link)
+        self.clear_dead_effects()
+
         self.generate_base_marks_rules()
 
     def after_move(self):
         for skill in self.skills.all():
             skill.after_move(self)
+
+        for effect_link in self.alive_effects:
+            effect_link.effect.after_target_move(effect_link)
+        for effect_link in self.alive_my_effects:
+            effect_link.effect.after_move(effect_link)
 
     def cell_rightclicked(self, i, j):
         if self.params.can_autoattack:
@@ -191,7 +220,13 @@ class Hero(models.Model):
         else:
             skills[0].run_current_phase(game_state, self, i, j)
 
+    def get_effect(self, effect_link):
+        effect_link.effect.on_getting(effect_link)
+
     def teleport(self, i, j):
         self.i = i
         self.j = j
         self.save()
+
+    def __str__(self):
+        return f"Hero {self.name} ({self.game_state.id})"

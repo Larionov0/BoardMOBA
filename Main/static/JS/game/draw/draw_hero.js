@@ -20,7 +20,7 @@ function draw_skill(skill, hero) {
 
 
 function draw_effect(effect){
-    return `<img src='/static/IMG/effects/${effect.img_src}' alt=${effect.name} class='effect_token' title='${effect.gen_description()}'>`
+    return `<img src='/static/IMG/effects/${effect.img_src}' alt=${effect.name} class='effect_token' title='${effect.description}'>`
 }
 
 function draw_effects(effects){
@@ -52,7 +52,7 @@ function draw_hero(hero, game_state){
     return `
     <div class="hero_card ${dop_class}">
         <div class="hero_first_row">
-            <div class="first_row_part effects_zone">${ draw_effects(hero.alive_effects) }</div>
+            <div class="first_row_part effects_zone">${ draw_effects(hero.effects) }</div>
             <div class="first_row_part hero_name">${hero.name}</div>
             <div class="first_row_part effects_zone">${ draw_shields(hero.alive_shields) }</div>
         </div>
