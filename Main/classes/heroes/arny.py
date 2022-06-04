@@ -41,14 +41,6 @@ def s1p1(game_state, hero, skill, i=None, j=None):
                         )
                     ))
 
-                    target.get_effect(EffectLink.objects.create(
-                        hero=target,
-                        caster=hero,
-                        effect=Stun.objects.create(
-                            duration=2
-                        )
-                    ))
-
                     skill.aftercast(game_state, hero)
                     hero.generate_base_marks_rules()
                     game_state.create_ui_redraw()
@@ -111,6 +103,17 @@ def s4p0(game_state, hero, skill, i=None, j=None):
         value=2,
         duration=3
     ))
+
+    hero.get_effect(EffectLink.objects.create(
+        hero=hero,
+        caster=hero,
+        effect=Toxicity.objects.create(
+            duration=3,
+            value=hero.params.magic // 2,
+            poison_duration=1
+        )
+    ))
+
     skill.aftercast(game_state, hero)
     game_state.create_ui_redraw()
 

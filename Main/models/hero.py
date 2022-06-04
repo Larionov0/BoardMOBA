@@ -197,8 +197,21 @@ class Hero(models.Model):
         self.make_autoattack(target)
         return True
 
+    def put_effects_on_autoattack(self, target):
+        if self.params.toxicity_value > 0:
+            target.get_effect(EffectLink.objects.create(
+                hero=target,
+                caster=self,
+                effect=Poison.objects.create(
+                    duration=self.params.toxicity_duration,
+                    value=self.params.toxicity_value
+                )
+            ))
+
     def make_autoattack(self, target):
         target.get_damage(self.params.power)
+        self.put_effects_on_autoattack(target)
+
         self.energy -= self.params.attack_cost
         self.attacks_during_turn += 1
         self.save()
