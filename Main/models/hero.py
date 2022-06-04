@@ -161,6 +161,8 @@ class Hero(models.Model):
         self.clear_dead_effects()
 
         self.generate_base_marks_rules()
+        if self.params.stun:
+            self.game_state.end_turn()
 
     def after_move(self):
         for skill in self.skills.all():

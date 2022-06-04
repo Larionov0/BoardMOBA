@@ -44,8 +44,7 @@ def s1p1(game_state, hero, skill, i=None, j=None):
                     target.get_effect(EffectLink.objects.create(
                         hero=target,
                         caster=hero,
-                        effect=Slowdown.objects.create(
-                            value=1,
+                        effect=Stun.objects.create(
                             duration=2
                         )
                     ))
@@ -73,7 +72,7 @@ def s2p0(game_state, hero, skill, i=None, j=None):
         hero=hero,
         caster=hero,
         effect=Solidity.objects.create(
-            duration=3
+            duration=1
         )
     ))
     skill.aftercast(game_state, hero)
