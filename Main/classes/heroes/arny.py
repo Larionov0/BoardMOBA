@@ -1,6 +1,6 @@
 from Main.classes.hero import HeroObj, SkillObj
 from Main.models.marks_rule import *
-from Main.models.effects.bleeding import Bleeding
+from Main.models.effects.all_effects import *
 from Main.models.effects.effect_link import EffectLink
 from Main.models.modifier import Modifier
 
@@ -40,6 +40,16 @@ def s1p1(game_state, hero, skill, i=None, j=None):
                             duration=2
                         )
                     ))
+
+                    target.get_effect(EffectLink.objects.create(
+                        hero=target,
+                        caster=hero,
+                        effect=Slowdown.objects.create(
+                            value=1,
+                            duration=2
+                        )
+                    ))
+
                     skill.aftercast(game_state, hero)
                     hero.generate_base_marks_rules()
                     game_state.create_ui_redraw()

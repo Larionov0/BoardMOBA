@@ -94,7 +94,11 @@ class Hero(models.Model):
         self.params = params
         self.save()
 
-        for modifier in self.modifiers.filter(is_alive=True):
+        temp_modificators = []
+        for effect_link in self.alive_effects:
+            temp_modificators.extend(effect_link.effect.gen_modifiers(effect_link))
+
+        for modifier in list(self.modifiers.filter(is_alive=True)) + temp_modificators:
             modifier.modify(self.params)
 
         self.params.can_autoattack = self.attacks_during_turn > 0
@@ -140,6 +144,9 @@ class Hero(models.Model):
             effect_link.effect.delete()
         self.effects.filter(is_alive=False).delete()
 
+    def clear_dead_modifiers(self):
+        self.modifiers.filter(is_alive=False).delete()
+
     def before_move(self):
         self.energy = self.params.max_energy
         self.attacks_during_turn = 0
@@ -165,6 +172,7 @@ class Hero(models.Model):
 
         for modifier in self.modifiers.filter(is_alive=True):
             modifier.decrease()
+        self.clear_dead_modifiers()
         self.recalc_params()
 
     def cell_rightclicked(self, i, j):
