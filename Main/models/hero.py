@@ -5,6 +5,7 @@ from .hero_params import HeroParams
 import random
 from Main.tools.math_tools import distance
 from Main.models.marks_rule import *
+from Main.models.effects.all_effects import *
 
 
 class Hero(models.Model):
@@ -101,7 +102,7 @@ class Hero(models.Model):
         for modifier in list(self.modifiers.filter(is_alive=True)) + temp_modificators:
             modifier.modify(self.params)
 
-        self.params.can_autoattack = self.attacks_during_turn > 0
+        self.params.can_autoattack = self.attacks_during_turn == 0
         self.params.save()
 
     def move(self, dir):
@@ -208,6 +209,12 @@ class Hero(models.Model):
         self.game_state.create_ui_redraw()
 
     def get_damage(self, damage):
+        if self.params.solidity == True:
+            solidity_link = self.alive_effects.get(effect_table=ContentType.objects.get_for_model(Solidity).id)
+            solidity_link.effect.decrease_duration(solidity_link)
+            self.recalc_params()
+            return
+
         remaining_damage = damage - self.params.armor
         if remaining_damage > 0:
             self.loose_hp(remaining_damage)

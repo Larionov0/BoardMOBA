@@ -7,9 +7,13 @@ class Modifier(models.Model):
     value = models.IntegerField()
     duration = models.IntegerField()
     is_alive = models.BooleanField(default=True)
+    is_set = models.BooleanField(default=False)  # будет ли модификатор устанавливать значение, а не плюсовать
 
     def modify(self, params):
-        setattr(params, self.param_name, getattr(params, self.param_name) + self.value)
+        if self.is_set:
+            setattr(params, self.param_name, self.value)
+        else:
+            setattr(params, self.param_name, getattr(params, self.param_name) + self.value)
         # save outside
 
     def decrease(self):

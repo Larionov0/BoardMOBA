@@ -68,9 +68,22 @@ skill1 = SkillObj('притягивание', 'skill1.png', 3, 3,
                   [s1p0, s1p1])
 
 
+def s2p0(game_state, hero, skill, i=None, j=None):
+    hero.get_effect(EffectLink.objects.create(
+        hero=hero,
+        caster=hero,
+        effect=Solidity.objects.create(
+            duration=3
+        )
+    ))
+    skill.aftercast(game_state, hero)
+    # hero.generate_base_marks_rules()
+    game_state.create_ui_redraw()
+
+
 skill2 = SkillObj('стальная кожа', 'skill2.png', 3, 2,
                   'Арни укрепляет кожу, получая Стойкость[1] (первый удар по нему будет заблокирован в течении хода)',
-                  lambda: True)
+                  [s2p0])
 
 skill3 = SkillObj('лобокол', 'skill3.png', 4, 3,
                   'Арни бьет лбом по линии перед собой (из 3 кл) в одном из 4 направлений. '
