@@ -7,5 +7,6 @@ from .solidity import Solidity
 from .stun import Stun
 from .toxicity import Toxicity
 from .silence import Silence
+from .delayed_damage import DelayedDamage, DelayedDamage_Effects
 
-all_effects = [Poison, Bleeding, Slowdown, Solidity, Stun, Toxicity, Silence]
+all_effects = [Poison, Bleeding, Slowdown, Solidity, Stun, Toxicity, Silence, DelayedDamage]

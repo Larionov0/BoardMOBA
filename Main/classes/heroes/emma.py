@@ -84,12 +84,53 @@ skill3 = SkillObj('болт с неба', 'skill3.png', 3, 3,
                   [s3p0, s3p1, s3p2])
 
 
+def s4p0(game_state, hero, skill, i=None, j=None):
+    game_state.clear_all_marks_rules()
+    MarksRule.objects.create(
+        name='s4',
+        game_state=game_state,
+        marks_form=Circle.objects.create(i=hero.i, j=hero.j, r=6, color='rgba(255, 100, 0, 0.2)')
+    )
+    game_state.create_ui_redraw()
+
+
+def s4p1(game_state, hero, skill, i, j):
+    if distance(hero.coords, [i, j]) > 6:
+        skill.cancel(game_state)
+        return
+
+    target = game_state.get_creature_by_coords(i, j)
+    if target and target.team != hero.team:
+        dd = DelayedDamage.objects.create(
+                duration=1,
+                damage=hero.params.power*2 + hero.params.magic*3,
+                stun_cancel=True,
+                max_distance=8
+            )
+
+        DelayedDamage_Effects.objects.create(
+            delayed_damage=dd,
+            effect=Bleeding.objects.create(duration=3)
+        )
+
+        target.get_effect(EffectLink.objects.create(
+            hero=target,
+            caster=hero,
+            effect=dd
+        ))
+        skill.aftercast(game_state, hero)
+        hero.generate_base_marks_rules()
+        game_state.create_ui_redraw()
+    else:
+        skill.cancel()
+
+
 skill4 = SkillObj('приговор', 'skill4.png', 8, 5,
-                  'Эмма прицеливается во врага на расстоянии до 6клб замедляя[1] его, '
+                  'Эмма прицеливается во врага на расстоянии до 6кл замедляя[1] его, '
                   'и в начале своего след хода совершает выстрел, нанося [сила*2]+[магия*3] урона. '
                   'Если цель погибает, Емма восстанавливает 15 здоровья. Сбить прицел может только '
                   'оглушение или перемещение цели за 8 кл.',
-                  lambda: True)
+                  [s4p0, s4p1])
 
 
 emma = HeroObj('emma', 40, 6, 8, 0, 3, 3.5, 2, [skill1, skill2, skill3, skill4])
