@@ -247,6 +247,8 @@ class Hero(models.Model):
         self.save()
 
     def skill_clicked(self, game_state, skill_number):
+        if self.params.silence:
+            return
         skill = self.skills.get(number=skill_number)
         if skill.chosen:
             skill.cancel(game_state)

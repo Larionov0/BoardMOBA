@@ -36,7 +36,7 @@ def s1p1(game_state, hero, skill, i=None, j=None):
                     target.get_effect(EffectLink.objects.create(
                         hero=target,
                         caster=hero,
-                        effect=Bleeding.objects.create(
+                        effect=Silence.objects.create(
                             duration=2
                         )
                     ))
