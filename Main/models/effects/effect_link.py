@@ -15,5 +15,6 @@ class EffectLink(models.Model):
         return {
             'img_src': self.effect.img_src,
             'description': self.effect.gen_description(self),
-            'name': self.effect.name
+            'name': self.effect.name,
+            'id': self.effect.id
         }

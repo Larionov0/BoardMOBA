@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    #main_div {
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(202, 255, 255, 0.501);
+    }
+
+    #d1 {
+        width: 20%;
+        height: 20%;
+        background-color: rgb(99, 218, 72);
+    }
+
+    #d2 {
+        width: 20%;
+        height: 20%;
+        background-color: rgb(135, 135, 255);
+    }
+</style>
+<body>
+<script>
+    var ACTIVE = null
+
+    function setup_listeners(){
+        var d1 = document.getElementById('d1')
+        var d2 = document.getElementById('d2')
+        // debugger
+        console.log([d1, d2]);
+        [d1, d2].forEach((d, index) => {
+            d.addEventListener('mouseover', function (event){
+                if (ACTIVE != index + 1){
+                    ACTIVE = index + 1
+                    redraw()
+                }
+            })
+
+            d.addEventListener('mouseout', (event)=>{
+                ACTIVE = null
+                redraw()
+            })
+        })
+    }
+
+    function redraw(){
+        document.body.innerHTML = `<div id="main_div">
+                                        <div id="d1"></div>
+                                        <div id="d2"></div>
+                                        <p id="p1">Ни на один квадрат не навели</p>
+                                    </div>`
+        setup_listeners()
+        
+        var p = document.getElementById('p1')
+        if (ACTIVE === null)
+            p.innerHTML = 'Ни на один квадрат не навели'
+        else if (ACTIVE == 1)
+            p.innerHTML = 'Навели на зеленый квадрат'
+        else if (ACTIVE == 2)
+            p.innerHTML = 'Навели на синий квадрат'
+    }
+
+    redraw()
+</script>
+</body>
+</html>

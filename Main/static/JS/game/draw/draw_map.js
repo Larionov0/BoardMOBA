@@ -7,10 +7,17 @@ function get_map_matrix(game_state){
         matrix[i][j].push(value)
     }
 
-    game_state.marks.forEach((mark)=>{
-        if (0<=mark.i && mark.i<game_state.n  &&  0<=mark.j && mark.j < game_state.m)
-            set_el(matrix, mark.i, mark.j, `<div class='mark' style='background-color: ${mark.color}'>`)
-    })
+    if (window.IS_MAIN_MARKS==true){
+        game_state.marks.forEach((mark)=>{
+            if (0<=mark.i && mark.i<game_state.n  &&  0<=mark.j && mark.j < game_state.m)
+                set_el(matrix, mark.i, mark.j, `<div class='mark' style='background-color: ${mark.color}'>`)
+        })
+    } else {
+        game_state.dop_marks[window.CUR_TARGET_EFFECT_ID].forEach((mark)=>{
+            if (0<=mark.i && mark.i<game_state.n  &&  0<=mark.j && mark.j < game_state.m)
+                set_el(matrix, mark.i, mark.j, `<div class='mark' style='background-color: ${mark.color}'>`)
+        })
+    }
 
     game_state.walls.forEach((wall)=>{
         if (0<=wall.i && wall.i<game_state.n  &&  0<=wall.j && wall.j < game_state.m)

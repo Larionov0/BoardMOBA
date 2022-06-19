@@ -123,8 +123,30 @@ class DomHelper{
         })
     }
 
+    set_up_delayed_damage_listeners(){
+        document.querySelectorAll('img[alt="DelayedDamage"]').forEach((img)=>{
+            img.addEventListener('mouseover', ()=>{
+                if (window.IS_MAIN_MARKS == true){
+                    let id = img.id.split('_')[1]
+                    console.log(`Delayd damage: ${id}`)
+                    window.IS_MAIN_MARKS = false
+                    window.CUR_TARGET_EFFECT_ID = id
+                    this.redraw_all()
+                }
+            })
+
+            img.addEventListener('mouseout', ()=>{
+                window.IS_MAIN_MARKS = true
+                window.CUR_TARGET_EFFECT_ID = null
+                this.redraw_all()
+            })
+        })
+    }
+
     set_up_event_listeners(){
         this.link_heroes()
+        
+        this.set_up_delayed_damage_listeners()
         if (this.game_state.my_turn){
             console.log('LISTENERS SETTUPED')
             this.set_up_wasd_listeners()

@@ -20,7 +20,7 @@ function draw_skill(skill, hero) {
 
 
 function draw_effect(effect){
-    return `<img src='/static/IMG/effects/${effect.img_src}' alt=${effect.name} class='effect_token' title='${effect.description}'>`
+    return `<img src='/static/IMG/effects/${effect.img_src}' alt=${effect.name} id='effect_${effect.id}' class='effect_token' title='${effect.description}'>`
 }
 
 function draw_effects(effects){

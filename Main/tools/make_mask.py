@@ -1,4 +1,6 @@
 from Main.tools.time_decorator import time_decorator
+from django.contrib.contenttypes.models import ContentType
+from Main.models.effects.all_effects import DelayedDamage
 
 
 def make_game_state_mask(game_state):
@@ -41,6 +43,14 @@ def make_marks_mask(game_state):
     return marks
 
 
+def make_dop_marks_mask(game_state):
+    dop_marks = {}
+    for hero in game_state.all_heroes.all():
+        for dd_link in hero.effects.filter(effect_table=ContentType.objects.get_for_model(DelayedDamage).id, is_alive=True):
+            dop_marks[dd_link.effect.id] = [mark.__dict__ for mark in dd_link.effect.gen_marks(dd_link)]
+    return dop_marks
+
+
 def make_mask(game_state, user, local_update_id):
     ui_actions = list(game_state.uiaction_set.filter(update_id__gt=local_update_id).order_by('update_id'))
 
@@ -53,8 +63,9 @@ def make_mask(game_state, user, local_update_id):
         'team': user.userprofile.team,
         'my_turn': user.userprofile.team == game_state.get_active_hero().team,
         'marks': make_marks_mask(game_state),
+        'dop_marks': make_dop_marks_mask(game_state),
         'ui_actions': [action.to_json() for action in ui_actions],
-        'update_id': ui_actions[-1].update_id
+        'update_id': ui_actions[-1].update_id,
     }
 
     return mask

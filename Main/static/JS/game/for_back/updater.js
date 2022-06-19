@@ -24,6 +24,7 @@ function apply_mask_to_game_state(mask, game_state){
 }
 
 function create_game_state_from_mask(mask){  // mask -> game_state
+    // console.log(mask);
     var GameState = window.GameState
     var all_heroes = window.all_heroes
 
@@ -43,6 +44,7 @@ function create_game_state_from_mask(mask){  // mask -> game_state
 
     const game_state = new GameState(heroes[1], heroes[2], new_all_heroes, mask.my_turn)
     game_state.update_n_m(mask.game_state.n, mask.game_state.m)
+    game_state.dop_marks = mask.dop_marks
     apply_mask_to_game_state(mask, game_state)
 
     window.team = mask.team

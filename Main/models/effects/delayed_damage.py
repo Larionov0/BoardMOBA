@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from Main.tools.math_tools import distance
 from .effect_link import EffectLink
+from Main.models.marks_rule import Circle
 
 
 class DelayedDamage_Effects(models.Model):
@@ -39,3 +40,6 @@ class DelayedDamage(DurableEffect):
         self.get_game_state(link).create_ui_action('damage', link.hero.id)
         for effect in self.effects:
             link.hero.get_effect(EffectLink.objects.create(effect=effect, hero=link.hero, caster=link.caster))
+
+    def gen_marks(self, link):
+        return Circle(color='rgba(255, 0, 0, 0.2)', i=link.caster.i, j=link.caster.j, r=self.max_distance).generate_marks()
