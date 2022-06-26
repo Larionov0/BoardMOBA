@@ -18,3 +18,7 @@ class EffectLink(models.Model):
             'name': self.effect.name,
             'id': self.effect.id
         }
+
+    def die(self):
+        self.is_alive = False
+        self.save()

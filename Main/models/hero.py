@@ -6,6 +6,7 @@ import random
 from Main.tools.math_tools import distance
 from Main.models.marks_rule import *
 from Main.models.effects.all_effects import *
+from django.contrib.contenttypes.models import ContentType
 
 
 class Hero(models.Model):
@@ -13,8 +14,8 @@ class Hero(models.Model):
 
     name = models.CharField(default='Hero', max_length=30)
     eng_name = models.CharField(default='Hero', max_length=30)
-    i = models.IntegerField(default=0)
-    j = models.IntegerField(default=0)
+    _i = models.IntegerField(default=0)
+    _j = models.IntegerField(default=0)
 
     game_state = models.ForeignKey('GameState', on_delete=models.CASCADE, blank=True, null=True, related_name='all_heroes')
     # is_proto = models.BooleanField(default=True)
@@ -32,8 +33,42 @@ class Hero(models.Model):
     is_alive = models.BooleanField(default=True)
 
     @property
+    def i(self):
+        return self._i
+
+    @i.setter
+    def i(self, value):
+        self._i = value
+        self.save()
+        self.after_coords_change()
+
+    @property
+    def j(self):
+        return self._j
+
+    @j.setter
+    def j(self, value):
+        self._j = value
+        self.save()
+        self.after_coords_change()
+
+    @property
     def hero_obj(self):
         return all_heroes[self.name]
+
+    def after_coords_change(self):
+        self.delayed_damage_move_check()
+        self.my_delayed_damage_move_check()
+
+    def delayed_damage_move_check(self):
+        for ef_link in self.effects.filter(is_alive=True, effect_table=ContentType.objects.get_for_model(DelayedDamage).id):
+            if ef_link.effect.max_distance < distance(self.coords, ef_link.caster.coords):
+                ef_link.die()
+
+    def my_delayed_damage_move_check(self):
+        for ef_link in self.my_effects.filter(is_alive=True, effect_table=ContentType.objects.get_for_model(DelayedDamage).id):
+            if ef_link.effect.max_distance < distance(self.coords, ef_link.hero.coords):
+                ef_link.die()
 
     # def generate_move_marks(self):
     #     radius = self.energy // (self.params.slowdown+1)

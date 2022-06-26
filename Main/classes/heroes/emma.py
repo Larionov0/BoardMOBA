@@ -105,7 +105,7 @@ def s4p1(game_state, hero, skill, i, j):
                 duration=1,
                 damage=hero.params.power*2 + hero.params.magic*3,
                 stun_cancel=True,
-                max_distance=8
+                max_distance=4
             )
 
         DelayedDamage_Effects.objects.create(

@@ -14,6 +14,8 @@ def make_hero_mask(hero):
     hero_mask = {key: value for key, value in hero.__dict__.items() if not key.startswith('_')}
     hero_mask['img_src'] = hero.hero_obj.img_src
     hero_mask['token_img_src'] = hero.hero_obj.token_img_src
+    hero_mask['i'] = hero.i
+    hero_mask['j'] = hero.j
 
     for key, value in hero.params.__dict__.items():
         if not key.startswith('_') and key != 'id':
