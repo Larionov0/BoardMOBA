@@ -15,12 +15,22 @@ class DelayedDamage_Effects(models.Model):
 
 
 class DelayedDamage(DurableEffect):
+    end_functions = []
     name = 'DelayedDamage'
     img_src = 'delayed_damage.png'
     damage = models.IntegerField()
     stun_cancel = models.BooleanField(default=False)
     move_cancel = models.BooleanField(default=False)
     max_distance = models.IntegerField()
+    end_function_index = models.IntegerField(null=True, blank=True)  # index of func (effect_link)
+
+    @classmethod
+    def find_index_by_end_func(cls, func):
+        return cls.end_functions.index(func)
+
+    @classmethod
+    def add_end_function(cls, func):
+        cls.end_functions.append(func)
     
     @property
     def effects(self):
@@ -40,6 +50,9 @@ class DelayedDamage(DurableEffect):
         self.get_game_state(link).create_ui_action('damage', link.hero.id)
         for effect in self.effects:
             link.hero.get_effect(EffectLink.objects.create(effect=effect, hero=link.hero, caster=link.caster))
+
+        if self.end_function_index is not None:
+            self.end_functions[self.end_function_index](link)
 
     def gen_marks(self, link):
         return Circle(color='rgba(255, 0, 0, 0.2)', i=link.caster.i, j=link.caster.j, r=self.max_distance).generate_marks()

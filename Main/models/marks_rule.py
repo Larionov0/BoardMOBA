@@ -49,6 +49,24 @@ class Line(MarksForm):
     i2 = models.IntegerField()
     j2 = models.IntegerField()
 
+    def generate_marks(self):
+        vector = [self.i2 - self.i1, self.j2 - self.j1]
+        assert vector[0] == 0 or vector[1] == 0, f'Мы пока не строим сложных линий : {self}'
+
+        not_null_coord = abs(vector[0] if vector[0] != 0 else vector[1])
+        vector[0] /= not_null_coord
+        vector[1] /= not_null_coord
+
+        marks = []
+
+        cur_point = [self.i1, self.j1]
+        for _ in range(not_null_coord + 1):
+            marks.append(Mark(*cur_point, self.color))
+            cur_point[0] += vector[0]
+            cur_point[1] += vector[1]
+
+        return marks
+
     def __str__(self):
         return f"Line {self.i1}:{self.j1} -> {self.i2}:{self.j2}"
 

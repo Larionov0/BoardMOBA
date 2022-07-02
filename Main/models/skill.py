@@ -54,3 +54,6 @@ class Skill(models.Model):
         if self.cur_cooldown > 0:
             self.cur_cooldown -= 1
             self.save()
+
+    def __str__(self):
+        return f"Skill {self.hero.name} {self.number} {self.name}"

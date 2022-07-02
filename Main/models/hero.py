@@ -32,6 +32,12 @@ class Hero(models.Model):
     attacks_during_turn = models.IntegerField(default=0)
     is_alive = models.BooleanField(default=True)
 
+    # ---------------= coords
+
+    @property
+    def coords(self):
+        return [self._i, self._j]
+
     @property
     def i(self):
         return self._i
@@ -51,6 +57,51 @@ class Hero(models.Model):
         self._j = value
         self.save()
         self.after_coords_change()
+
+    def change_coords(self, i, j):
+        self._i = i
+        self._j = j
+        self.save()
+        self.after_coords_change()
+
+    def move(self, dir):
+        if self.energy > self.params.slowdown:
+            i, j = self.i, self.j
+            if dir == 'w':
+                i -= 1
+            elif dir == 'a':
+                j -= 1
+            elif dir == 's':
+                i += 1
+            elif dir == 'd':
+                j += 1
+
+            if self.game_state.can_move_to_point(i, j):
+                self.change_coords(i, j)
+
+                self.energy -= 1 + self.params.slowdown
+                self.save()
+                self.generate_base_marks_rules()
+                self.game_state.create_ui_redraw()
+                return True
+        return False
+
+    def be_pushed(self, vector1, dist, callback=lambda obj: None, redraw=False):
+        for i in range(dist):
+            new_coords = [self.i + vector1[0], self.j + vector1[1]]
+            obj = self.game_state.get_solid_obj_by_coords(*new_coords)
+            if obj is None:
+                self.change_coords(*new_coords)
+            else:
+                if redraw:
+                    self.game_state.create_ui_redraw()
+                callback(obj)
+                break
+        else:
+            if redraw:
+                self.game_state.create_ui_redraw()
+
+    # --------------------------
 
     @property
     def hero_obj(self):
@@ -118,10 +169,6 @@ class Hero(models.Model):
     def color(self):
         return 'rgba(0, 0, 255, 0.3)' if self.team == 1 else 'rgba(255, 0, 0, 0.3)'
 
-    @property
-    def coords(self):
-        return [self.i, self.j]
-
     def recalc_params(self):  # FIXME: доделать когда появятся еффекты
         params = self.base_params
         params.pk = None
@@ -139,29 +186,6 @@ class Hero(models.Model):
 
         self.params.can_autoattack = self.attacks_during_turn == 0
         self.params.save()
-
-    def move(self, dir):
-        if self.energy > self.params.slowdown:
-            i, j = self.i, self.j
-            if dir == 'w':
-                i -= 1
-            elif dir == 'a':
-                j -= 1
-            elif dir == 's':
-                i += 1
-            elif dir == 'd':
-                j += 1
-
-            if self.game_state.can_move_to_point(i, j):
-                self.i = i
-                self.j = j
-
-                self.energy -= 1 + self.params.slowdown
-                self.save()
-                self.generate_base_marks_rules()
-                self.game_state.create_ui_redraw()
-                return True
-        return False
 
     @property
     def alive_effects(self):
@@ -257,6 +281,12 @@ class Hero(models.Model):
 
         self.generate_base_marks_rules()
         self.game_state.create_ui_redraw()
+
+    def heal(self, hp):
+        self.hp += hp
+        if self.hp > self.params.max_hp:
+            self.hp = self.params.max_hp
+        self.save()
 
     def get_damage(self, damage):
         if self.params.solidity == True:
