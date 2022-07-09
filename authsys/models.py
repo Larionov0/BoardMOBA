@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
     lobby = models.ForeignKey('Main.Lobby', on_delete=models.SET_NULL, blank=True, null=True, related_name='userprofiles')
+    short_info = models.CharField(max_length=50, default='', blank=True)  # используется для сохранения промежуточной инфы во время боя. (напр. точка, выбранная в прошлой фазе умения (как у арни))
 
     @classmethod
     def create_from_user(cls, user):

@@ -7,6 +7,7 @@ from Main.tools.math_tools import distance
 from Main.models.marks_rule import *
 from Main.models.effects.all_effects import *
 from django.contrib.contenttypes.models import ContentType
+from numpy import array
 
 
 class Hero(models.Model):
@@ -36,7 +37,7 @@ class Hero(models.Model):
 
     @property
     def coords(self):
-        return [self._i, self._j]
+        return array([self._i, self._j])
 
     @property
     def i(self):
@@ -102,6 +103,10 @@ class Hero(models.Model):
                 self.game_state.create_ui_redraw()
 
     # --------------------------
+
+    @property
+    def userprofile(self):
+        return self.game_state.lobby.userprofiles.get(team=self.team)
 
     @property
     def hero_obj(self):

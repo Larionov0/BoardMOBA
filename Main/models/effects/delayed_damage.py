@@ -19,7 +19,7 @@ class DelayedDamage(DurableEffect):
     name = 'DelayedDamage'
     img_src = 'delayed_damage.png'
     damage = models.IntegerField()
-    stun_cancel = models.BooleanField(default=False)
+    stun_cancel = models.BooleanField(default=False)  # TODO: do stun cancel & move cancel
     move_cancel = models.BooleanField(default=False)
     max_distance = models.IntegerField()
     end_function_index = models.IntegerField(null=True, blank=True)  # index of func (effect_link)

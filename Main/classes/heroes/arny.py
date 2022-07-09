@@ -3,6 +3,7 @@ from Main.models.marks_rule import *
 from Main.models.effects.all_effects import *
 from Main.models.effects.effect_link import EffectLink
 from Main.models.modifier import Modifier
+from numpy import array
 
 
 def s1p0(game_state, hero, skill, i=None, j=None):
@@ -33,17 +34,8 @@ def s1p1(game_state, hero, skill, i=None, j=None):
                     # cast
                     target.teleport(point[0], point[1])
                     target.get_damage(hero.params.magic)
-                    target.get_effect(EffectLink.objects.create(
-                        hero=target,
-                        caster=hero,
-                        effect=Silence.objects.create(
-                            duration=2
-                        )
-                    ))
 
                     skill.aftercast(game_state, hero)
-                    hero.generate_base_marks_rules()
-                    game_state.create_ui_redraw()
                     game_state.create_ui_action('damage', target.id)
                     game_state.create_ui_redraw()
                     return
@@ -76,12 +68,88 @@ skill2 = SkillObj('стальная кожа', 'skill2.png', 3, 2,
                   'Арни укрепляет кожу, получая Стойкость[1] (первый удар по нему будет заблокирован в течении хода)',
                   [s2p0])
 
+
+def s3p0(game_state, hero, skill, i=None, j=None):
+    game_state.clear_all_marks_rules()
+    MarksRule.objects.create(
+        marks_form=Circle.objects.create(
+            i=hero.i, j=hero.j,
+            r=1, color='rgba(0, 0, 100, 0.2)'
+        ),
+        name='skill3',
+        game_state=game_state
+    )
+    game_state.create_ui_redraw()
+
+
+def s3p1(game_state, hero, skill, i=None, j=None):
+    game_state.clear_all_marks_rules()
+    if distance([i, j], hero.coords) == 1:
+        vector = array([i, j]) - hero.coords  # [i - hero.i, j - hero.j]
+        c_point = hero.coords + vector
+        vector1 = array([vector[1], vector[0]])
+        vector2 = array([-vector[1], -vector[0]])
+        point1 = c_point + vector1
+        point2 = c_point + vector2
+        userprofile = hero.userprofile
+        userprofile.short_info = f'{c_point[0]} {c_point[1]}'
+        userprofile.save()
+        MarksRule.objects.create(
+            marks_form=Line.objects.create(i1=point1[0], j1=point1[1], i2=point2[0], j2=point2[1],
+                                           color=f"rgba(0, 0, 100, 0.2)"),
+            name='skill3',
+            game_state=game_state
+        )
+        game_state.create_ui_redraw()
+    else:
+        skill.cancel(game_state)
+
+
+def s3p2(game_state, hero, skill, i=None, j=None):
+    c_point = array(list(map(int, hero.userprofile.short_info.split(' '))))
+    if [i, j] == list(c_point):
+        vector = array([i, j]) - hero.coords
+        vector1 = array([vector[1], vector[0]])
+        vector2 = array([vector[1], -vector[0]])
+        point1 = c_point + vector1
+        point2 = c_point + vector2
+
+        for point in [c_point, point1, point2]:
+            target = game_state.get_creature_by_coords(*point)
+            if target is not None and target.team != hero.team:
+                target.get_damage(hero.params.magic)
+                target.get_effect(EffectLink.objects.create(
+                    caster=hero,
+                    hero=target,
+                    effect=Slowdown.objects.create(
+                        duration=1,
+                        value=1
+                    )
+                ))
+                game_state.create_ui_action('damage', target.id)
+                target.be_pushed(vector, 2, lambda obj: s3_stolknovenie(obj, game_state, hero, skill, target), redraw=True)
+                skill.aftercast(game_state, hero)
+    else:
+        skill.cancel(game_state)
+
+
+def s3_stolknovenie(obj, game_state, hero, skill, target):
+    target.get_effect(EffectLink.objects.create(
+        caster=hero,
+        hero=target,
+        effect=Stun.objects.create(
+            duration=1
+        )
+    ))
+    game_state.create_ui_action('damage', target.id)
+
+
 skill3 = SkillObj('лобокол', 'skill3.png', 4, 3,
                   'Арни бьет лбом по линии перед собой (из 3 кл) в одном из 4 направлений. '
                   'Все враги, стоящие на этой линии, отлетают на 2 кл и получают [магия] урона '
                   'а также замедление[1] на ход. Если враг при отлёте столкнулся с другим героем или стенкой, '
                   'он получает оглушение.',
-                  lambda: True)
+                  [s3p0, s3p1, s3p2])
 
 
 def s4p0(game_state, hero, skill, i=None, j=None):
@@ -115,7 +183,6 @@ def s4p0(game_state, hero, skill, i=None, j=None):
     ))
 
     skill.aftercast(game_state, hero)
-    game_state.create_ui_redraw()
 
 
 skill4 = SkillObj('ядовитые щупальца', 'skill4.png', 8, 3,

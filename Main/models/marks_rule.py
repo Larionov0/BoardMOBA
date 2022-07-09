@@ -52,7 +52,6 @@ class Line(MarksForm):
     def generate_marks(self):
         vector = [self.i2 - self.i1, self.j2 - self.j1]
         assert vector[0] == 0 or vector[1] == 0, f'Мы пока не строим сложных линий : {self}'
-
         not_null_coord = abs(vector[0] if vector[0] != 0 else vector[1])
         vector[0] /= not_null_coord
         vector[1] /= not_null_coord
