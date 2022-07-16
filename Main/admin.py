@@ -4,5 +4,5 @@ from Main.models.effects.all_effects import all_effects
 
 
 for model in [Lobby, GameState, Hero, Skill, HeroParams, UIAction, Circle, Rectangle, Line, MarksRule, EffectLink,
-              *all_effects, Modifier]:
+              *all_effects, Modifier, Shield]:
     admin.site.register(model)
