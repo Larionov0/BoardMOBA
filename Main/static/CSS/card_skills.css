@@ -1,7 +1,8 @@
 .skill {
     display: flex;
     flex-direction: column;
-    font-size: 16px;
+    /* font-size: 16px; */
+    font-size: 80%;
     transition-duration: 0.1s;
     max-width: 22%;
     min-width: 10%;
@@ -27,11 +28,12 @@
     min-width: 50%;
     max-width: 50%;
     height: 150%;
-    font-size: 25px;
+    /* font-size: 25px; */
+    font-size: 150%;
 }
 
 .skill_name {
-    font-size: 50%;
+    /* font-size: 50%; */
     height: 15%;
     text-align: center;
     background-color: rgba(197, 216, 194, 0.407);
@@ -51,7 +53,7 @@
 
 .skill_description {
     height: 30%;
-    font-size: 35%;
+    font-size: 70%;
     overflow: hidden;
 }
 
