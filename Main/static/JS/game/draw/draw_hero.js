@@ -33,7 +33,7 @@ function insert_img(filename){
 }
 
 function draw_shield(shield){
-    return `<img src='/static/IMG/icons/armor.png' class='effect_token' title='${shield.gen_description()}'>`
+    return `<img src='/static/IMG/icons/armor.png' class='effect_token' title='${shield.description}'>`
 }
 
 function draw_shields(shields){
@@ -54,7 +54,7 @@ function draw_hero(hero, game_state){
         <div class="hero_first_row">
             <div class="first_row_part effects_zone">${ draw_effects(hero.effects) }</div>
             <div class="first_row_part hero_name">${hero.name}</div>
-            <div class="first_row_part effects_zone">${ draw_shields(hero.alive_shields) }</div>
+            <div class="first_row_part effects_zone">${ draw_shields(hero.shields) }</div>
         </div>
         <div class="hero_second_row">
             <div class="hero_image_div">

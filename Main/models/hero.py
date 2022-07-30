@@ -200,6 +200,10 @@ class Hero(models.Model):
     def alive_my_effects(self):
         return self.my_effects.filter(is_alive=True)
 
+    @property
+    def alive_shields(self):
+        return self.shields.filter(is_alive=True)
+
     def clear_dead_effects(self):
         for effect_link in self.my_effects.filter(is_alive=False):
             effect_link.effect.delete()
@@ -212,6 +216,9 @@ class Hero(models.Model):
     def clear_dead_modifiers(self):
         self.modifiers.filter(is_alive=False).delete()
 
+    def clear_dead_shields(self):
+        self.shields.filter(is_alive=False).delete()
+
     def before_move(self):
         self.energy = self.params.max_energy
         self.attacks_during_turn = 0
@@ -223,6 +230,10 @@ class Hero(models.Model):
         for effect_link in self.alive_my_effects:
             effect_link.effect.before_move(effect_link)
         self.clear_dead_effects()
+
+        for shield in self.my_shields.filter(is_alive=True):
+            shield.decrease_duration()
+        self.clear_dead_shields()
 
         self.generate_base_marks_rules()
         if self.params.stun:
@@ -293,12 +304,24 @@ class Hero(models.Model):
             self.hp = self.params.max_hp
         self.save()
 
+    def take_damage_through_shields(self, damage):
+        shields = self.alive_shields.order_by('duration')
+        for shield in shields:
+            damage = shield.get_damage(damage)
+            if damage <= 0:
+                damage = 0
+                break
+
+        return damage
+
     def get_damage(self, damage):
-        if self.params.solidity == True:
+        if self.params.solidity is True:
             solidity_link = self.alive_effects.get(effect_table=ContentType.objects.get_for_model(Solidity).id)
             solidity_link.effect.decrease_duration(solidity_link)
             self.recalc_params()
             return
+
+        damage = self.take_damage_through_shields(damage)
 
         remaining_damage = damage - self.params.armor
         if remaining_damage > 0:
@@ -343,6 +366,9 @@ class Hero(models.Model):
     def get_modifier(self, modifier, recalc=True):
         if recalc:
             self.recalc_params()
+
+    def get_shield(self, shield):
+        pass
 
     def teleport(self, i, j):
         self.i = i

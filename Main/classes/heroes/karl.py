@@ -1,4 +1,5 @@
 from Main.classes.hero import HeroObj, SkillObj
+from Main.models.shield import Shield
 
 
 skill1 = SkillObj('бросок топора', 'skill1.png', 2, 2,
@@ -7,13 +8,25 @@ skill1 = SkillObj('бросок топора', 'skill1.png', 2, 2,
                   lambda: True)
 
 
+def s2p0(game_state, hero, skill, i=None, j=None):
+    hero.get_shield(Shield.objects.create(
+        hero=hero,
+        caster=hero,
+        duration=1,
+        value=7 + hero.params.magic,
+        max_value=7 + hero.params.magic,
+        armor=0
+    ))
+    skill.aftercast(game_state, hero)
+
+
 skill2 = SkillObj('крепкая стойка', 'skill2.png', 3, 1,
                   'Карл встает в крепкую стойку и получает щит[7 + [магия]] на ход',
-                  lambda: True)
+                  [s2p0])
 
 skill3 = SkillObj('размах', 'skill3.png', 3, 3,
                   'Карл одним размахом наносит [сила + магия] урона всем окружающим врагам и отталкивает их',
-                  lambda : True)
+                  lambda: True)
 
 
 skill4 = SkillObj('Добивание', 'skill4.png', 7, 4,
