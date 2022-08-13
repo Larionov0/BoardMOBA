@@ -6,7 +6,7 @@ from Main.models.effects.all_effects import DelayedDamage
 def make_game_state_mask(game_state):
     return {
         'active_hero_index': game_state.active_hero_index,
-        'n': game_state.n, 'm': game_state.m
+        'map': game_state.map
     }
 
 

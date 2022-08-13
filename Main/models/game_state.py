@@ -6,15 +6,30 @@ from Main.models.skill import Skill
 import random
 from .ui_action import UIAction
 import json
+from Main.maps import maps
+from Main.tools.geometric_tools import check_is_point_in_square
 
 
 class GameState(models.Model):
     active_hero_index = models.IntegerField(default=0)
-    n = models.IntegerField(default=12)
-    m = models.IntegerField(default=12)
+    # n = models.IntegerField(default=12)
+    # m = models.IntegerField(default=12)
     update_id = models.IntegerField(default=1)
+    map_id = models.IntegerField(default=1)
 
     active_hero_json = models.TextField(max_length=100, default='{}')  # дополнительные параметры для скиллов активного героя (например, сохранять координаты с одной фазы для использования в другой фазе)
+
+    @property
+    def map(self):
+        return maps[self.map_id]
+
+    @property
+    def n(self):
+        return self.map['n']
+
+    @property
+    def m(self):
+        return self.map['m']
 
     @property
     def active_hero_dict(self):
@@ -24,9 +39,6 @@ class GameState(models.Model):
     def active_hero_dict(self, dct):
         self.active_hero_json = json.dumps(dct)
         self.save()
-
-    def check_if_can_move_to_point(self, i, j):
-        pass
 
     def create_heroes(self, heroes_names: dict):
         self.all_heroes.clear()
@@ -114,14 +126,17 @@ class GameState(models.Model):
     def wasd_pressed(self, dir):
         self.get_active_hero().move(dir)
 
-    def get_all_solid_objects(self):
+    def _get_all_solid_objects(self):
         return [*list(self.all_heroes.all())]
 
     def get_solid_obj_by_coords(self, i, j):
         if i<0 or i>=self.n or j<0 or j>=self.m:
             return {'solid': True, 'object': 'wall'}
+        for wall_cluster in self.map['walls']:
+            if check_is_point_in_square(i, j, wall_cluster):
+                return {'solid': True, 'object': 'wall'}
 
-        objects = [obj for obj in self.get_all_solid_objects() if obj.i == i and obj.j == j]
+        objects = [obj for obj in self._get_all_solid_objects() if obj.i == i and obj.j == j]
         if len(objects) == 0:
             return None
         else:
@@ -136,8 +151,8 @@ class GameState(models.Model):
             return obj
 
     def can_move_to_point(self, i, j):
-        if not (0 <= i < self.n and 0 <= j < self.m):
-            return False
+        # if not (0 <= i < self.n and 0 <= j < self.m):
+        #     return False
 
         if self.get_solid_obj_by_coords(i, j):
             return False

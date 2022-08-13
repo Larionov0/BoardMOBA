@@ -8,9 +8,10 @@ class GameState {
     constructor(heroes1, heroes2, all_heroes, my_turn=false, active_hero_index=0, n=12, m=16, turn_number=0){
         this.dom_helper = new DomHelper(this)
 
+        this.map = null
+
         this.marks = []
 
-        this.walls = []
         this.towers = []
         this.minions = []
 
