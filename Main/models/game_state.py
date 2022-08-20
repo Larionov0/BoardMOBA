@@ -149,6 +149,10 @@ class GameState(models.Model):
             if check_is_point_in_square(i, j, wall_cluster):
                 return {'solid': True, 'object': 'wall'}
 
+        for tower in self.alive_towers:
+            if i in [tower.i, tower.i+1] and j in [tower.j, tower.j+1]:
+                return tower
+
         objects = [obj for obj in self._get_all_solid_objects() if obj.i == i and obj.j == j]
         if len(objects) == 0:
             return None
