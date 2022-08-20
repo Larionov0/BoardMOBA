@@ -33,9 +33,9 @@ function get_map_matrix(game_state){
 
     draw_walls(game_state, matrix)
 
-    game_state.alive_towers.forEach((tower)=>{
-        for (let i = tower.i; i <= tower.end_i; i++){
-            for (let j = tower.j; j <= tower.end_j; j++){
+    game_state.towers.forEach((tower)=>{
+        for (let i = tower.i; i < tower.i + 2; i++){
+            for (let j = tower.j; j < tower.j + 2; j++){
                 set_el(matrix, i, j, `<div class='tower' title='${tower.hp}/${tower.max_hp}' style='background-color: ${tower.color}'>`)
             }
         }

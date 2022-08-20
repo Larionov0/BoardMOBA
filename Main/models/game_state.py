@@ -8,6 +8,7 @@ from .ui_action import UIAction
 import json
 from Main.maps import maps
 from Main.tools.geometric_tools import check_is_point_in_square
+from Main.models.map_objects.tower import Tower
 
 
 class GameState(models.Model):
@@ -22,6 +23,10 @@ class GameState(models.Model):
     @property
     def map(self):
         return maps[self.map_id]
+
+    @property
+    def alive_towers(self):
+        return self.towers.filter(hp__gt=0)
 
     @property
     def n(self):
@@ -92,7 +97,14 @@ class GameState(models.Model):
         u2.save()
 
         self.create_heroes(heroes_names)
+        self.setup_heroes()
+        self.create_towers()
 
+        self.create_ui_redraw()
+
+        self.get_active_hero().before_move()
+
+    def setup_heroes(self):
         all_heroes = list(self.all_heroes.all())
         random.shuffle(all_heroes)
         for i, hero in enumerate(all_heroes):
@@ -110,9 +122,10 @@ class GameState(models.Model):
         for hero in all_heroes:
             hero.set_random_coords(self.n, self.m)
 
-        self.create_ui_redraw()
-
-        self.get_active_hero().before_move()
+    def create_towers(self):
+        for team in [1, 2]:
+            for number in [1, 2]:
+                Tower.objects.create(team=team, number=number, hp=Tower.HP_DICT[number], game_state=self)
 
     def create_ui_action(self, type, target_id=0, duration=0.3):
         self.uiaction_set.create(type=type, target_id=target_id, duration=duration)
