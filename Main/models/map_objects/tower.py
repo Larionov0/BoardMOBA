@@ -1,4 +1,6 @@
 from django.db import models
+from Main.tools.math_tools import distance
+from Main.tools.geometric_tools import check_is_point_in_square
 
 
 class Tower(models.Model):
@@ -42,6 +44,17 @@ class Tower(models.Model):
         }[self.team][self.number]
 
     @property
+    def center(self):
+        return [self.i + 0.5, self.j + 0.5]
+
+    # @property
+    # def center(self):
+    #     return {
+    #         1: [self.i + 1, self.j],
+    #         2: [self.i, self.j + 1]
+    #     }[self.team]
+
+    @property
     def damage(self):
         return {1: 25, 2: 20}[self.number]
 
@@ -57,6 +70,23 @@ class Tower(models.Model):
             'hp': self.hp,
             'max_hp': self.max_hp
         }
+
+    def check_is_obj_in_range(self, enemy):
+        return check_is_point_in_square(*enemy.coords, self.range)
+
+    def find_closest_enemy(self, enemies: list):
+        return min(enemies, key=lambda enemy: distance(enemy.coords, self.center))
+
+    def my_turn(self):
+        enemies = self.game_state.get_alive_creatures_by_team(3 - self.team)
+        enemy = self.find_closest_enemy(enemies)
+        if self.check_is_obj_in_range(enemy):
+            self.shoot(enemy)
+            self.game_state.create_ui_action('damage', enemy.id)
+            self.game_state.create_ui_redraw()
+
+    def shoot(self, enemy):
+        enemy.get_damage(self.damage)
 
     def __str__(self):
         return

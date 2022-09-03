@@ -21,6 +21,10 @@ class GameState(models.Model):
     active_hero_json = models.TextField(max_length=100, default='{}')  # дополнительные параметры для скиллов активного героя (например, сохранять координаты с одной фазы для использования в другой фазе)
 
     @property
+    def alive_heroes(self):
+        return list(self.all_heroes.filter(is_alive=True))
+
+    @property
     def map(self):
         return maps[self.map_id]
 
@@ -162,6 +166,11 @@ class GameState(models.Model):
     def get_all_creatures(self):
         return [*list(self.all_heroes.all())]
 
+    def get_alive_creatures_by_team(self, team) -> list:
+        heroes = list(self.all_heroes.filter(is_alive=True, team=team))
+        # minions
+        return heroes
+
     def get_creature_by_coords(self, i, j):
         obj = self.get_solid_obj_by_coords(i, j)
         if obj and obj.is_creature:
@@ -176,11 +185,17 @@ class GameState(models.Model):
 
         return True
 
+    def towers_turn(self):
+        for tower in self.alive_towers:
+            tower.my_turn()
+
     def end_turn(self):
         self.get_active_hero().after_move()
 
         self.active_hero_index += 1
         if self.active_hero_index == self.all_heroes.count():
+            self.towers_turn()
+            # Minions
             self.active_hero_index = 0
         self.save()
 
