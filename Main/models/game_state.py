@@ -9,6 +9,7 @@ import json
 from Main.maps import maps
 from Main.tools.geometric_tools import check_is_point_in_square
 from Main.models.map_objects.tower import Tower
+from Main.models.minion import Minion
 
 
 class GameState(models.Model):
@@ -103,6 +104,28 @@ class GameState(models.Model):
         self.create_heroes(heroes_names)
         self.setup_heroes()
         self.create_towers()
+
+        base_params = HeroParams.objects.create(
+            max_hp=20,
+            max_energy=5,
+            power=5,
+            armor=0,
+            magic=0,
+            attack_range=2,
+            attack_cost=2,
+        )
+        params = base_params
+        params.pk = None
+        params.save()
+        Minion.objects.create(
+            _i=14,
+            _j=10,
+            game_state=self,
+            base_params=base_params,
+            params=params,
+            hp=20,
+            energy=5
+        )
 
         self.create_ui_redraw()
 

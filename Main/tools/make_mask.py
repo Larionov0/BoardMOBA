@@ -8,6 +8,7 @@ def make_game_state_mask(game_state):
         'active_hero_index': game_state.active_hero_index,
         'map': game_state.map,
         'towers': [tower.to_dict() for tower in game_state.alive_towers],
+        'minions': make_minions_mask(game_state),
     }
 
 
@@ -53,6 +54,10 @@ def make_dop_marks_mask(game_state):
         for dd_link in hero.effects.filter(effect_table=ContentType.objects.get_for_model(DelayedDamage).id, is_alive=True):
             dop_marks[dd_link.effect.id] = [mark.__dict__ for mark in dd_link.effect.gen_marks(dd_link)]
     return dop_marks
+
+
+def make_minions_mask(game_state):
+    return [minion.to_dict() for minion in game_state.all_minions.all()]
 
 
 def make_mask(game_state, user, local_update_id):

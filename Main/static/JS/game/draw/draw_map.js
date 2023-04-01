@@ -41,7 +41,7 @@ function get_map_matrix(game_state){
         }
     })
 
-    game_state.alive_minions.forEach((minion)=>{
+    game_state.minions.forEach((minion)=>{
         set_el(matrix, minion.i, minion.j, `<div class='minion' title='${minion.hp}/${minion.max_hp}' style='background-color: ${minion.color}'>`)
     })
 
