@@ -2,7 +2,7 @@ from django.db import models
 
 
 class UIAction(models.Model):
-    update_id = models.IntegerField(primary_key=True)
+    update_id = models.AutoField(primary_key=True)
     game_state = models.ForeignKey('GameState', on_delete=models.CASCADE)
     type = models.CharField(max_length=10, choices=(('damage', 'damage'), ('redraw', 'redraw')))
     target_id = models.IntegerField(default=0)
